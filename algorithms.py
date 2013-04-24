@@ -87,6 +87,10 @@ def boltzmann(distList, temp):
 		
 	return armChoices
 
+"""
+Gives Boltzmann probability distribution according to the observed mean of
+choices 
+"""
 def calcBoltzProb(observedMeans,temp):
 	l = []
 	sum = 0
@@ -109,7 +113,7 @@ if __name__ == '__main__':
 	dlist, meanList = normalDistribution(5, 10)
 	print dlist
 	choices = epsilonGreedy(dlist, 0.5)
-	#print choices
+	print choices
 	
 	dlist, meanList = normalDistribution(5, 10)
 	choices = boltzmann(dlist, 0.5)
