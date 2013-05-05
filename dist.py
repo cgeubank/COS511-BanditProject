@@ -1,37 +1,71 @@
 import numpy as np
+from scipy.stats import invgauss
+from random import randrange 
+import math as math
 
-# Returns List of numbers that follow normal distribution
-def normalDistribution(numArms, numRounds):
-	# 2-D List where each contained list represents a round
-	completeList = []
+# Generates the distribution on the arms with some probability
+# Returns list of lists where first level list is by round
+# and within each list, it is the number produced by an arm 
+def getDist(numArms, numRounds):
+	distList = []
+	muSigmaList = []
 	
-	# list containing mu, sigma for each arm's distribution
-	meanList = []
-
-	# mean and standard deviation - generated randomly from (0,1)
+	for roundIndex in range(0, numRounds):
+		distList.append([])
+	
 	for armIndex in range(0, numArms):
-		mu, sigma = np.random.random_sample(), np.random.random_sample()
-		meanList.append(mu)
-	
-	# empty list for each round
-	for armIndex in range(0, numRounds):
-		completeList.append([])
-	
-	# generate numbers for each round
-	for armIndex in range(0, numArms): 
-		# use normal distribution for each arm
-		dist = np.random.normal(mu, sigma, numRounds)
+		distDecision = randrange(3)
+		if distDecision == 0:
+			dist, muSigma = normalDistribution(numRounds)
+		elif distDecision == 1:
+			dist, muSigma = inverseGaussian(numRounds)
+		elif distDecision == 2:
+			dist, muSigma = gumbel(numRounds)
+			
+		for i in range(0, numRounds):
+			distList[i].append(dist[i])
+			
+		muSigmaList.append(muSigma)
 		
-		# split dist into separate rounds
-		roundIndex = 0
-		for num in dist:
-			(completeList[roundIndex]).append(num);
-			roundIndex += 1
+	return distList, muSigmaList 
 		
-	return completeList, meanList
+# Returns List of numbers that follow normal distribution
+def normalDistribution(numRounds):
+	# mean and standard deviation - generated randomly from (0,1)
+	mu, sigma = np.random.random_sample(), np.random.random_sample()
+	
+	# use normal distribution for arm
+	dist = np.random.normal(mu, sigma, numRounds)
+	
+	return dist, (mu, sigma)
+
+# Returns List of numbers that follow inverse Gaussian distribution	
+def inverseGaussian(numRounds):
+	mu = np.random.random_sample()
+	sigma = math.sqrt(invgauss.var(mu))
+	
+	# use inverse Gaussian distribution for arm
+	dist = invgauss.rvs(mu, size=numRounds)
+	
+	return dist, (mu, sigma)
+	
+# Returns list of numbers that follow Gumbel distribution
+def gumbel(numRounds):
+	mu = np.random.random_sample();
+	beta = 0.1;
+	
+	# use Gumbel distribution for arm
+	dist = np.random.gumbel(mu, beta, numRounds)
+	
+	# fix mean and std deviation
+	mu = mu + 0.57721 * beta 
+	var = ((math.pi * math.pi)/6)*(beta * beta)
+	sigma = math.sqrt(var)
+	
+	return dist, (mu, sigma)
 	
 # Test main
 if __name__ == '__main__':
-	dlist, meanList = normalDistribution(5, 1)
+	dlist, meanList = getDist(5, 10)
 	for list in dlist:
 		print list

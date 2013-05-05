@@ -1,54 +1,8 @@
-import numpy as np
 import math
-from dist import *
 from scipy.stats import rv_discrete
 
-"""
-Epsilon-Greedy Algorithm:
-Picks random arm with prob epsilon and arm with highest observed mean
-with prob (1 - epsilon)
-"""
-def epsilonGreedy(distList, epsilon):
-	#print distList
-	armChoices = []
-	numRounds = len(distList)
-	numArms = len(distList[0])
-	
-	# Stores the total reward and number of times an arm is selected
-	observedMeans = []
-	for arm in range(0, numArms):
-		observedMeans.append((0.0,0))
-	
-	for roundIndex in range(0, numRounds):
-		prob = np.random.random_sample()
-		# With prob less than epsilon, pick random arm
-		if (prob < epsilon):
-			armIndex = np.random.randint(0, high=numArms)
-		# With prob 1 - epsilon, pick arm with highest empirical mean	
-		else:
-			# Find highest empirical mean
-			max = 0.0
-			armIndex = -1
-			for i in range(0, len(observedMeans)):
-				total, count = observedMeans[i]
-				if count == 0:
-					if armIndex == -1:
-						armIndex = i
-				else:
-					if ((total/count) > max):
-						max = total/count
-						armIndex = i
-			
-		# Record choices made
-		armChoices.append(armIndex)
-		
-		# Update the empirical mean for choice made
-		observedReward = distList[roundIndex][armIndex]
-		prevTotal, prevCount = observedMeans[armIndex] 
-		observedMeans[armIndex] = prevTotal + observedReward, prevCount + 1
-		
-	return armChoices
-	
+from dist import *
+
 """
 Boltzmann Exploration
 Pick each arm with a probability that is proportional to its average reward
@@ -75,7 +29,7 @@ def boltzmann(distList, temp):
 		probs = calcBoltzProb(observedMeans, temp)
 		
 		boltzDist = rv_discrete(name='custm', values=[tuple(indices), tuple(probs)])
-		armIndex = list(boltzDist.rvs(size=1))[0]
+		armIndex = boltzDist.rvs(size=1)[0]
 		
 		# Record choices made
 		armChoices.append(armIndex)
@@ -106,16 +60,21 @@ def calcBoltzProb(observedMeans,temp):
 		else:
 			l.append((1.0/sum))
 	
-	return l
-
+	return l	
+	
 # Test main
 if __name__ == '__main__':
-	dlist, meanList = normalDistribution(5, 10)
-	print dlist
-	choices = epsilonGreedy(dlist, 0.5)
-	print choices
+	dlist, muSigmaList = getDist(5, 100)
+	for list in dlist:
+		print list
 	
-	dlist, meanList = normalDistribution(5, 10)
+	# Get means of each distribution
+	meanList = []
+	for (mu, sigma) in muSigmaList:
+		meanList.append(mu)
+		
+	# Print Distribution in sorted order
+	eval.printMeans(meanList)
+	
 	choices = boltzmann(dlist, 0.5)
 	print choices
-	

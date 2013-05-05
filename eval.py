@@ -1,15 +1,23 @@
 from algorithms import *
 from operator import itemgetter
+from epsilonGreedy import epsilonGreedy
+from boltzmann import boltzmann
+from simplePoker import simplePoker
 
 """
 Returns total expected regret for a certain algorithm 
 run on a certain distribution
 """
-def totalExpectedRegret(dist, algorithms, distParams, algParams):
+def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 	# Generate Distribution
-	dist, meanList = dist(*distParams)
+	dist, muSigmaList = distributionMethod(*distParams)
 	numRounds = len(dist)
 	
+	# Get means of each distribution
+	meanList = []
+	for (mu, sigma) in muSigmaList:
+		meanList.append(mu)
+		
 	# Print Distribution in sorted order
 	printMeans(meanList)
 	
@@ -62,7 +70,7 @@ def printChoices(name, armChoices, meanList):
 # Test main
 if __name__ == '__main__':
 	func1 = epsilonGreedy
-	dist = normalDistribution
+	dist = getDist
 	numArms = 25
 	rounds = 1000
 	epsilon = 0.6
@@ -70,5 +78,7 @@ if __name__ == '__main__':
 	func2 = boltzmann
 	temp = 0.99
 	
-	regrets = totalExpectedRegret(dist, [func1, func2], [numArms, rounds], [[epsilon], [temp]])
+	func3 = simplePoker
+	
+	regrets = totalExpectedRegret(dist, [func1, func2, func3], [numArms, rounds], [[epsilon], [temp], []])
 	print regrets 
