@@ -3,6 +3,7 @@ from operator import itemgetter
 from epsilonGreedy import epsilonGreedy
 from boltzmann import boltzmann
 from simplePoker import simplePoker
+from advPoker import advPoker
 
 """
 Returns total expected regret for a certain algorithm 
@@ -26,10 +27,11 @@ def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 	
 	# Calculate expected regret for each algorithm for this distribution
 	for alg in algorithms:
+		print "------"
 		armChoices = alg(dist, *(algParams[algParamIndex]))
 	
 		# print out choices 
-		printChoices(str(alg), armChoices, meanList)
+		#printChoices(str(alg), armChoices, meanList)
 	
 		# zip list (concatenate tuples into two separate tuples) and then find max mean
 		bestMean = max(meanList)
@@ -71,8 +73,8 @@ def printChoices(name, armChoices, meanList):
 if __name__ == '__main__':
 	func1 = epsilonGreedy
 	dist = getDist
-	numArms = 25
-	rounds = 1000
+	numArms = 100
+	rounds = 600
 	epsilon = 0.6
 	
 	func2 = boltzmann
@@ -80,5 +82,8 @@ if __name__ == '__main__':
 	
 	func3 = simplePoker
 	
-	regrets = totalExpectedRegret(dist, [func1, func2, func3], [numArms, rounds], [[epsilon], [temp], []])
+	func4 = advPoker
+	
+	#regrets = totalExpectedRegret(dist, [func1, func2, func3, func4], [numArms, rounds], [[epsilon], [temp], [], []])
+	regrets = totalExpectedRegret(dist, [func3, func4], [numArms, rounds], [[], []])
 	print regrets 

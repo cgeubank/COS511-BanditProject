@@ -9,7 +9,7 @@ from dist import *
 Simple Poker
 Assume normal distribution on each arm
 """
-def simplePoker(distList):
+def advPoker(distList):
 	armChoices = []
 	numRounds = len(distList)
 	numArms = len(distList[0])
@@ -66,9 +66,16 @@ def simplePoker(distList):
 				
 				# Calculate Integral
 				normalProbDist = lambda x : (1/(stdDev * math.sqrt(math.pi * 2))) * math.exp(-((x - mean) * (x - mean))/(2 * stdDev * stdDev))
-				intg = integrate.quad(normalProbDist, highestObservedMean + delta, inf)[0]
+				normalIntg = integrate.quad(normalProbDist, highestObservedMean + delta, inf)[0]
+				
+				invGausDist = lambda x : (1/math.sqrt(2*math.pi*x**3)) * math.exp(-(x-mean)**2/(2*x*mean**2))
+				invGausIntg = integrate.quad(invGausDist, highestObservedMean + delta, inf)[0]
+				
+				gumbelDist = lambda x : ((math.exp(-(x - mean)/0.1))/(0.1))*(math.exp(-math.exp((-(x - mean)/0.1))))
+				gumbelIntg = integrate.quad(gumbelDist, highestObservedMean + delta, inf)[0]
 				
 				# Calculate score for arm				
+				intg = (1.0/3)*normalIntg + (1.0/3)*invGausIntg + (1.0/3)*gumbelIntg
 				value = mean + delta*(numRounds - roundIndex) * intg
 				#print "score", value 
 				
