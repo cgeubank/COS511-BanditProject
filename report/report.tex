@@ -1,0 +1,133 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%  Template for creating scribe notes for cos511.
+%
+%  Fill in your name, lecture number, lecture date and body
+%  of scribe notes as indicated below.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\documentclass[12pt]{article}
+
+\usepackage{amsmath, amsfonts, amsthm, fullpage, amssymb, algpseudocode, algorithm, graphicx}
+
+\setlength{\topmargin}{0pt}
+\setlength{\textheight}{9in}
+\setlength{\headheight}{0pt}
+\setlength{\headsep}{0pt}
+\setlength{\oddsidemargin}{0.25in}
+\setlength{\textwidth}{6in}
+
+\newcommand{\comment}[1]{}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{invariant}[theorem]{Invariant}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{property}[theorem]{Property}
+\newtheorem{remark}[theorem]{Remark}
+
+\pagestyle{plain}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+\bf\large COS 511: Theoretical Machine Learning
+\end{center}
+
+\noindent
+Lecturer: Rob Schapire   %%% FILL IN LECTURER (if not RS)
+\hfill
+Project Report              %%% FILL IN LECTURE NUMBER HERE
+\\
+Authors: Christian Eubank, Sachin Ravi                %%% FILL IN YOUR NAME HERE
+\hfill
+May 14, 2013           %%% FILL IN LECTURE DATE HERE
+
+\noindent
+\rule{\textwidth}{1pt}
+
+\medskip
+
+\section{Introduction}
+In this paper, we study the stochastic multi-armed bandit problem. Here, a player is  
+faced with a row of slot machines (``arms'') and must decide in each round which machine
+to play.  Each of the arms when picked provides a random reward to the player from the distribution
+specific to the machine. The goal of the player is to maximize the sum of rewards received through a
+sequence of selections.  
+
+These problems are the most basic examples of decision games where the player is faced with an 
+exploration-exploitation faceoff.  Exploitation is routinely picking the arm that gives a high reward,
+whereas exploration involves trying out new arms which may or may not give a higher reward. 
+
+Though the original motivation (which still remains relevant) for the problem was clinical trials, many 
+new applications have arisen.  One application is in ad placement, where we want to decide which advertisement
+to show the next vistor to a website.  For example, in \cite{Chakrabarti}, the authors formulate a modified version
+of the problem, where arms have a lifetime after which they expire.  This expiration helps model ads, which often 
+have limited lifetimes due to their content and compaign budgets.  Another application is in Web document ranking.  
+Here, the user searches for a topic and relevant documents must be ranked to be shown to the user.  In \cite{Radlinski}, 
+the authors propose an online learning method using multi-armed bandit algorithms that produces rankings from usage data.   
+
+\section{Background}
+We now review the fundamental formalization of the bandit problem. The problem consists of a set of $K$ probability distributions
+$(D_1, \ldots, D_k)$ with associated expected values $(\mu_1, \ldots, \mu_k)$ and variances $(\sigma^2_1, \ldots, \sigma^2_k)$.
+In the beginning, the $D_i$ are unknown to the player.  At each round $t = 1,2,\ldots,T$, the player selects an arm with index $j(t)$
+and receives a reward $r(t) \sim D_{j(t)}$ and player's goal is to maximize his receieved reward summed over all rounds.  A bandit algorithm
+specifies a strategy by which the player should choose an arm $j(t)$ in each round.
+
+The most popular perfomance measure (according to \cite{Kuleshov}) for bandit algorithms is \emph{total expected regret}.  Assuming the 
+total number of rounds is $T$, \emph{total expected regret} is defined as
+\begin{align}
+R_T = T\mu^{*} - \sum_{i=1}^{T} \mu_{j(t)},
+\end{align}
+wher $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the highest expected reward from the best arm. 
+
+We now present three previously conceived algorithms whose performance we use for comparison in our experiments:  $\epsilon$-greedy, Boltzmann exploration, and Poker.
+In the following, let $p_i(t)$ be the probability of picking arm $i$ at time $t$.
+
+\subsection{$\epsilon$-greedy}
+The $\epsilon$-greedy algorithm is widely used because it is a simple heuristic that performs great in practice. 
+At each round $t = 1, \ldots, T$, the algorithm selects the arm with the highest observed empirical mean with probability $1 - \epsilon$ and
+selects a random arm with probability $\epsilon$.  More specifically, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
+\begin{align*}
+p_i(t+1) = 
+\begin{cases}
+1 - \epsilon + \frac{\epsilon}{k}, & \textrm{if } i = \arg \max_{j = 1, \ldots, k} \hat{\mu}_j(t) \\
+\frac{\epsilon}{k}, & \textrm{otherwise}
+\end{cases}
+\end{align*}
+
+The value of $\epsilon$ is a parameter in this method, and smaller values of $\epsilon$ will cause less exploration and more exploitation, whereas
+larger values of $\epsilon$ will cause more exploration and less exploitation.
+
+\subsection{Boltzmann Exploration}
+In the $\epsilon$-greedy method, we do exploration by uniformly picking an arm at random; However, it would make sense to have the probability 
+of picking an arm be proportional somewhat to the reward we have received from that arm this far.  This would ensure that the exploration we do 
+is less random and more sensible with regard to the arms' performance so far.  This type of proportional weighting is exactly what Boltzmann Exploration 
+uses.  Specifically, the probability of picking an arm is proportional to the average reward it has provided so far and these probabilities are 
+set according to the Boltzmann distribution.  Again, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
+\begin{align*}
+p_i(t+1) = \frac{e^{\hat{\mu}_i(t)/\tau}}{\sum_{j=1}^{k} e^{\hat{\mu}_j(t)/\tau}} \, \, \textrm{for } i = 1, \ldots, k
+\end{align*}
+
+The value of $\tau$ (oftentimes called the ``temperature'' parameter) controls the randomness of the choices.  When $\tau \to 0$, the algorithm
+acts like pure greedy and continuously picks the arm with the highest observed empirical average.  When $\tau \to \infty$, the algorithm picks
+arms uniformly at random.
+
+\subsection{Poker}
+The ``Price of Knowledge and Estimated Reward'' (Poker) strategy is a newer algorithm introduced in \cite{Mohri}. 
+
+\section{Algorithm}
+
+\section{Experiments}
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}
