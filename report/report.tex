@@ -106,7 +106,7 @@ larger values of $\epsilon$ will cause more exploration and less exploitation.
 
 \subsection{Boltzmann Exploration}
 In the $\epsilon$-greedy method, we do exploration by uniformly picking an arm at random; However, it would make sense to have the probability 
-of picking an arm be proportional somewhat to the reward we have received from that arm this far.  This would ensure that the exploration we do 
+of picking an arm be proportional in some manner to the reward we have received from that arm this far.  This would ensure that the exploration we do 
 is less random and more sensible with regard to the arms' performance so far.  This type of proportional weighting is exactly what Boltzmann Exploration 
 uses.  Specifically, the probability of picking an arm is proportional to the average reward it has provided so far and these probabilities are 
 set according to the Boltzmann distribution.  Again, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
@@ -119,8 +119,24 @@ acts like pure greedy and continuously picks the arm with the highest observed e
 arms uniformly at random.
 
 \subsection{Poker}
-The ``Price of Knowledge and Estimated Reward'' (Poker) strategy is a newer algorithm introduced in \cite{Mohri}. 
+The ``Price of Knowledge and Estimated Reward'' (Poker) strategy is a newer algorithm introduced in \cite{Mohri}.  Unlike the previous strategies,
+Poker is a pricing strategy that assigns prices to each arm and at each round picks the arm that has the highest price.  The price for each arm 
+takes into account two pieces of information: exploitation (the reward received from this arm so far) and exploration (the knowledge that could be gained
+from pulling this arm).  
 
+Let $\mu^{*} = \max(\mu_1, \ldots, \mu_k)$ be the the highest mean and let $\hat{\mu}^{*} = \arg \max(\hat{\mu}_1, \ldots, \hat{\mu}_k))$ be the highest 
+observed empirical mean.  We know $\mu^{*} \ge \hat{\mu}^{*}$ and so $\mu^{*} - \hat{\mu}^{*}$ is the reward mean improvement.  We then denote 
+$\delta_{\mu} = \mathbb{E}[\mu^{*} - \hat{\mu}^{*}]$ to be the expected reward improvement.
+
+At each round, the expected gain when pulling an arm $i$ is given by the expected reward improvement $\delta_{\mu}$ multiplied by the probability of an
+improvement $\Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}]$, where $\mu_i$ is the actual mean of the arm $i$.  If we let $H$ be the number of remaining rounds, 
+we can exploit this knowledge gain $H$ times and so the arm pricing formula is 
+$$
+p_i = \hat{\mu}_i + \Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}] \delta_{\mu} H,
+$$
+where $\hat{\mu}_i$ (the empirical average) represents the exploitation price and the second term represents the exploration price of this specific arm $i$. 
+
+Let us now discuss the calculation of the second term.
 \section{Algorithm}
 
 \section{Experiments}
