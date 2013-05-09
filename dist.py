@@ -14,7 +14,7 @@ def getDist(numArms, numRounds):
 		distList.append([])
 	
 	for armIndex in range(0, numArms):
-		distDecision = 0
+		distDecision = 0 # for now, we just want to use the normal distribution
 		if distDecision == 0:
 			dist, muSigma = normalDistribution(numRounds)
 		elif distDecision < 0.50:
@@ -43,20 +43,25 @@ def normalDistribution(numRounds):
 # The rest of the arms have reward magGood
 def getPathologicalDist(numArms, numRounds, propBad, magGood):
 	distList = []
+	muSigmaList = []
 	
 	for roundIndex in range(0, numRounds):
 		distList.append([])
 
 	for armIndex in range(0, numArms):
 		if armIndex < propBad * numArms:
-			dist = np.random.normal((armIndex+1) * 0.0000000001, 0.00000000000000000001, numRounds)
+			dist = np.random.normal((armIndex+1) * 0.0000000001, 0.00001, numRounds)
+			muSigma = ((armIndex+1) * 0.0000000001, 0.00001)
 		else:
-			dist = np.random.normal(magGood, 0.00000000000000000001, numRounds)
+			dist = np.random.normal(magGood, 0.00001, numRounds)
+			muSigma = (magGood, 0.00001)
 
 		for i in range(0, numRounds):
 			distList[i].append(dist[i])
 
-	return distList
+		muSigmaList.append(muSigma)
+
+	return distList, muSigmaList
 
 # Returns List of numbers that follow inverse Gaussian distribution	
 def inverseGaussian(numRounds):
