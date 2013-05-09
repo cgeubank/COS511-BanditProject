@@ -53,8 +53,8 @@ def getPathologicalDist(numArms, numRounds, propBad, magGood):
 			dist = np.random.normal((armIndex+1) * 0.0000000001, 0.00001, numRounds)
 			muSigma = ((armIndex+1) * 0.0000000001, 0.00001)
 		else:
-			dist = np.random.normal(magGood, 0.00001, numRounds)
-			muSigma = (magGood, 0.00001)
+			dist = np.random.normal(magGood, 1, numRounds)
+			muSigma = (magGood, 1)
 
 		for i in range(0, numRounds):
 			distList[i].append(dist[i])

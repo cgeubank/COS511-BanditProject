@@ -4,6 +4,9 @@ from epsilonGreedy import epsilonGreedy
 from boltzmann import boltzmann
 from simplePoker import simplePoker
 from advPoker import advPoker
+from pureGuess import pureGuess
+from dist import *
+from boltzPoker import boltzPoker
 
 """
 Returns total expected regret for a certain algorithm 
@@ -20,7 +23,7 @@ def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 		meanList.append(mu)
 		
 	# Print Distribution in sorted order
-	printMeans(meanList)
+	#printMeans(meanList)
 	
 	regrets = []
 	algParamIndex = 0
@@ -31,7 +34,7 @@ def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 		armChoices = alg(dist, *(algParams[algParamIndex]))
 	
 		# print out choices 
-		printChoices(str(alg), armChoices, meanList)
+		#printChoices(str(alg), armChoices, meanList)
 	
 		# zip list (concatenate tuples into two separate tuples) and then find max mean
 		bestMean = max(meanList)
@@ -74,16 +77,27 @@ if __name__ == '__main__':
 	func1 = epsilonGreedy
 	dist = getDist
 	numArms = 10
-	rounds = 1000
+	rounds = 100
 	epsilon = 0.6
 	
 	func2 = boltzmann
-	temp = 0.99
+	temp = 0.5
 	
 	func3 = simplePoker
 	
 	func4 = advPoker
+	func5 = pureGuess
+	func6 = boltzPoker
 	
-	#regrets = totalExpectedRegret(dist, [func1, func2, func3, func4], [numArms, rounds], [[epsilon], [temp], [], []])
-	regrets = totalExpectedRegret(dist, [func3, func4], [numArms, rounds], [[], []])
-	print regrets 
+	numTrials = 100
+	guessBetter = 0.0
+	for i in range(0, numTrials):
+		print i
+		#regrets = totalExpectedRegret(dist, [func1, func2, func3, func4], [numArms, rounds], [[epsilon], [temp], [], []])
+		regrets = totalExpectedRegret(dist, [func3, func6], [numArms, rounds], [[], [temp]])
+		if regrets[0] >= regrets[1]:
+			guessBetter += 1
+	
+	print guessBetter/numTrials
+		
+	#print regrets 

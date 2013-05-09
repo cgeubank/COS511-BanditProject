@@ -74,7 +74,7 @@ if __name__ == '__main__':
 		meanList.append(mu)
 		
 	# Print Distribution in sorted order
-	eval.printMeans(meanList)
+	#eval.printMeans(meanList)
 	
 	choices = boltzmann(dlist, 0.5)
 	print choices
