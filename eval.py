@@ -31,7 +31,7 @@ def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 		armChoices = alg(dist, *(algParams[algParamIndex]))
 	
 		# print out choices 
-		#printChoices(str(alg), armChoices, meanList)
+		printChoices(str(alg), armChoices, meanList)
 	
 		# zip list (concatenate tuples into two separate tuples) and then find max mean
 		bestMean = max(meanList)
@@ -73,8 +73,8 @@ def printChoices(name, armChoices, meanList):
 if __name__ == '__main__':
 	func1 = epsilonGreedy
 	dist = getDist
-	numArms = 100
-	rounds = 600
+	numArms = 10
+	rounds = 1000
 	epsilon = 0.6
 	
 	func2 = boltzmann

@@ -14,12 +14,12 @@ def getDist(numArms, numRounds):
 		distList.append([])
 	
 	for armIndex in range(0, numArms):
-		distDecision = randrange(1)
+		distDecision = 0
 		if distDecision == 0:
 			dist, muSigma = normalDistribution(numRounds)
-		elif distDecision == 1:
+		elif distDecision < 0.50:
 			dist, muSigma = inverseGaussian(numRounds)
-		elif distDecision == 2:
+		elif distDecision < 1.0:
 			dist, muSigma = gumbel(numRounds)
 			
 		for i in range(0, numRounds):
