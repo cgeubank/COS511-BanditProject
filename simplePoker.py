@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from scipy import integrate
 from scipy import inf
 from scipy.integrate import quad
@@ -26,10 +27,14 @@ def simplePoker(distList):
 	observedStdDevs = []
 	for arm in range(0, numArms):
 		observedStdDevs.append(0.0)
+		
+	# Random indices for arms chosen twice in beginning of iteration	
+	firstRandomIndex = np.random.randint(0, high=numArms)
+	secondRandomIndex = np.random.randint(0, high=numArms)
 	
 	bestIndex = -1
 	for roundIndex in range(0, numRounds): 
-		if (roundIndex > numArms):
+		if (roundIndex > 3):
 			q = 0
 			for (reward, times) in observedMeans:
 				if times > 0:
@@ -42,7 +47,7 @@ def simplePoker(distList):
 			
 			# Pick highest and sqrt(q) highest means
 			highestObservedMean = sortedMeanList[0][0]/sortedMeanList[0][1]
-			sqrtQ = int(math.sqrt(q))
+			sqrtQ = int(math.floor(math.sqrt(q)))
 			highestQMean = sortedMeanList[sqrtQ][0]/sortedMeanList[sqrtQ][1]
 			
 			# Calculate delta
@@ -68,17 +73,20 @@ def simplePoker(distList):
 				normalProbDist = lambda x : (1/(stdDev * math.sqrt(math.pi * 2))) * math.exp(-((x - mean) * (x - mean))/(2 * stdDev * stdDev))
 				intg = integrate.quad(normalProbDist, highestObservedMean + delta, inf)[0]
 				
+				#print "normal", intg
+				
 				# Calculate score for arm				
 				value = mean + delta*(numRounds - roundIndex) * intg
-				#print "score", value 
+				#print "score", value, "index", j 
 				
 				# Maintain arm with best score
 				if (value > bestVal):
 					bestVal = value
 					bestIndex = j
-		else:
-			# Play each arm at least once
-			bestIndex = (bestIndex + 1) % numArms 
+		elif roundIndex <= 1:
+			bestIndex = firstRandomIndex
+		elif roundIndex <= 3:
+			bestIndex = secondRandomIndex
 		
 		# Record choice
 		armChoices.append(bestIndex)
@@ -95,7 +103,7 @@ def simplePoker(distList):
 		for reward in listOfRewards[bestIndex]:
 			newStdDev += (reward - newMean)*(reward - newMean)
 		
-		newStdDev = math.sqrt(newStdDev)
+		newStdDev = math.sqrt(newStdDev/len(listOfRewards[bestIndex]))
 		observedStdDevs[bestIndex] = newStdDev
 		
 	return armChoices
@@ -132,7 +140,7 @@ if __name__ == '__main__':
 		meanList.append(mu)
 		
 	# Print Distribution in sorted order
-	eval.printMeans(meanList)
+	# eval.printMeans(meanList)
 	
 	choices = simplePoker(dlist)
 	print choices
