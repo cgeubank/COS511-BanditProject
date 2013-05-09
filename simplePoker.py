@@ -2,6 +2,7 @@ import math
 from scipy import integrate
 from scipy import inf
 from scipy.integrate import quad
+from random import randrange 
 
 from dist import *
 
@@ -25,11 +26,17 @@ def simplePoker(distList):
 	# Stores std dev for each arm
 	observedStdDevs = []
 	for arm in range(0, numArms):
-		observedStdDevs.append(0.0)
+		observedStdDevs.append(0)
 	
 	bestIndex = -1
-	for roundIndex in range(0, numRounds): 
-		if (roundIndex > numArms):
+	for roundIndex in range(0, numRounds):
+		if roundIndex == 0:
+			bestIndex = randrange(numArms)
+		if roundIndex == 2:
+			bestIndex = randrangeExcept(numArms, bestIndex)
+		elif roundIndex < 4:
+			bestIndex = bestIndex
+		else:
 			q = 0
 			for (reward, times) in observedMeans:
 				if times > 0:
@@ -49,7 +56,7 @@ def simplePoker(distList):
 			delta = (highestObservedMean - highestQMean)/math.sqrt(q)
 			
 			# Find arm with best score
-			bestVal = 0
+			bestVal = float("-inf")
 			bestIndex = -1
 			for j in range(0, numArms):
 				# Get observed Mean for arm
@@ -76,9 +83,6 @@ def simplePoker(distList):
 				if (value > bestVal):
 					bestVal = value
 					bestIndex = j
-		else:
-			# Play each arm at least once
-			bestIndex = (bestIndex + 1) % numArms 
 		
 		# Record choice
 		armChoices.append(bestIndex)
@@ -109,6 +113,12 @@ def averageMean(observedMeans):
 			sum += (total/count)
 	
 	return (sum/div)
+
+def randrangeExcept(N, except_index):
+	while True:
+		index = randrange(N)
+		if index != except_index:
+			return index
 	
 def averageStdDev(stdDevs):
 	div = 0
@@ -132,7 +142,7 @@ if __name__ == '__main__':
 		meanList.append(mu)
 		
 	# Print Distribution in sorted order
-	eval.printMeans(meanList)
+	#eval.printMeans(meanList)
 	
 	choices = simplePoker(dlist)
-	print choices
+	#print choices
