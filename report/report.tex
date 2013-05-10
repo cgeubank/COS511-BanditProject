@@ -66,9 +66,9 @@ whereas exploration involves trying out new arms which may or may not give a hig
 
 Though the original motivation (which still remains relevant) for the problem was clinical trials, many 
 new applications have arisen.  One application is in ad placement, where we want to decide which advertisement
-to show the next vistor to a website.  For example, in \cite{Chakrabarti}, the authors formulate a modified version
+to show the next visitor to a website.  For example, in \cite{Chakrabarti}, the authors formulate a modified version
 of the problem, where arms have a lifetime after which they expire.  This expiration helps model ads, which often 
-have limited lifetimes due to their content and compaign budgets.  Another application is in Web document ranking.  
+have limited lifetimes due to their content and campaign budgets.  Another application is in Web document ranking.  
 Here, the user searches for a topic and relevant documents must be ranked to be shown to the user.  In \cite{Radlinski}, 
 the authors propose an online learning method using multi-armed bandit algorithms that produces rankings from usage data.   
 
@@ -76,10 +76,10 @@ the authors propose an online learning method using multi-armed bandit algorithm
 We now review the fundamental formalization of the bandit problem. The problem consists of a set of $K$ probability distributions
 $(D_1, \ldots, D_k)$ with associated expected values $(\mu_1, \ldots, \mu_k)$ and variances $(\sigma^2_1, \ldots, \sigma^2_k)$.
 In the beginning, the $D_i$ are unknown to the player.  At each round $t = 1,2,\ldots,T$, the player selects an arm with index $j(t)$
-and receives a reward $r(t) \sim D_{j(t)}$ and player's goal is to maximize his receieved reward summed over all rounds.  A bandit algorithm
+and receives a reward $r(t) \sim D_{j(t)}$ and player's goal is to maximize his received reward summed over all rounds.  A bandit algorithm
 specifies a strategy by which the player should choose an arm $j(t)$ in each round.
 
-The most popular perfomance measure (according to \cite{Kuleshov}) for bandit algorithms is \emph{total expected regret}.  Assuming the 
+The most popular performance measure (according to \cite{Kuleshov}) for bandit algorithms is \emph{total expected regret}.  Assuming the 
 total number of rounds is $T$, \emph{total expected regret} is defined as
 \begin{align}
 R_T = T\mu^{*} - \sum_{i=1}^{T} \mu_{j(t)},
@@ -138,6 +138,48 @@ where $\hat{\mu}_i$ (the empirical average) represents the exploitation price an
 
 Let us now discuss the calculation of the second term.
 \section{Algorithm}
+
+\subsection{Motivation (IN PROGRESS)}
+
+The authors' proof that Poker is a zero regret strategy hinges upon considering an infinite horizon and thus considering the behavior of their price function as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that we know the number of rounds in advance or, as the authors suggest in the case in which the number of rounds is unknown, we consider $H$ to be a fixed parameter.
+
+Recall that the initialization of Poker requires the algorithm to pull two random arms twice.
+
+
+Let rewards be in $[0,1]$ \\
+
+\noindent
+\textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$ each round) is $O(p^{2})$. \\ 
+
+Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct (EXPLAIN WHY). Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
+
+In each turn, the algorithm sets $p_{i} = \hat{\mu}_{i} + \delta(T-t)\int_{x}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$
+
+
+
+We have assumed that $H$ is finite and, by definition $\delta$ will be finite.
+
+SOMETHING ABOUT INTEGRALS
+
+Thus, if sigma is arbitrarily close to $0$, $p_{i} \rightarrow \hat{\mu}_{i}$ and Poker will continue to greedily pick the lever with the highest empirical mean. Given that the unobserved levers have empirical means set equal to the average of the empirical means of levers 1 and 2, one of the two bad levers will have a strictly greater empirical mean.\footnote{We are ignoring the case that $\hat{\mu}_{1} = \hat{\mu}_{2}$ exactly because since the rewards are real numbers and their true means are different, the event of this strict equality holding is 0}
+
+As a result, the algorithm initialized with two bad arms will greedily keep playing one of these two bad arms for the entire time game. Give that the maximum payout is 1 and the best payout of any bad arm is $\gamma$, the expected regret per round will be at least $1-\gamma$. 
+
+Finally, the probability that Poker initializes by choosing two distinct bad arms is simply $({pK\over{K}})({p(K-1)\over{K}}) = ({K-1\over K})p^{2}$ desired.
+
+EMPIRICAL RESULTS
+
+\subsection{Our approach}
+
+While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with the Boltzmann algorithm.
+
+During each round $\texttt{boltzPoker}$ (other than the four initialization rounds), the algorithm calculates the values of $p_{i}$ as in the standard Poker algorithm. Next, the algorithm maps this vector of values into a probability vector in accordance to the Boltzmann distribution and a temperature parameter in the same as the standard Boltzmann algorithm maps the mean vector into probabilities. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.}
+
+In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the "goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
+
+
+
+
 
 \section{Experiments}
 

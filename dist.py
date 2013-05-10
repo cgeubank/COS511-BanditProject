@@ -33,8 +33,15 @@ def getDistFromFile():
 			# Each line contains the rewards for a certain round
 			roundIndex = 0
 			for reward in line:
-				distList[lineCount - 2].append(float(reward))
-		
+				distList[lineCount - 2].append(-1.0 * float(reward)) # negative rewards since we are dealing with payoffs
+
+	# Given that the values are in integers, add a small bit of noise to entries whose first two entries are equal
+	# So as to prevent segmentation faults in which the case the standard deviations are 0
+	for armIndex in range(0, numArms):
+		for roundIndex in range(1, numRounds):
+			if distList[roundIndex][armIndex] == distList[roundIndex - 1][armIndex]:
+				distList[roundIndex][armIndex] += 0.0001
+			
 	# Calculate mean and standard deviation from reward info
 	for armIndex in range(0, numArms):
 		# Mean:
@@ -144,8 +151,7 @@ def gumbel(numRounds):
 	
 # Test main
 if __name__ == '__main__':
-	dlist, meanList = getDist(5, 10)
-	for list in dlist:
-		print list
+	dlist, meanList = getDistFromFile() #getDist(5, 10)
+	#for list in dlist:
+		#print list
 		
-	getDistFromFile()

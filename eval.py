@@ -75,13 +75,13 @@ def printChoices(name, armChoices, meanList):
 # Test main
 if __name__ == '__main__':
 	func1 = epsilonGreedy
-	dist = getDist
+	dist = getDistFromFile
 	numArms = 10
 	rounds = 100
-	epsilon = 0.6
+	epsilon = 0.2
 	
 	func2 = boltzmann
-	temp = 0.5
+	temp = 0.01
 	
 	func3 = simplePoker
 	
@@ -89,12 +89,13 @@ if __name__ == '__main__':
 	func5 = pureGuess
 	func6 = boltzPoker
 	
-	numTrials = 100
+	numTrials = 20
 	guessBetter = 0.0
 	for i in range(0, numTrials):
 		print i
 		#regrets = totalExpectedRegret(dist, [func1, func2, func3, func4], [numArms, rounds], [[epsilon], [temp], [], []])
-		regrets = totalExpectedRegret(dist, [func3, func6], [numArms, rounds], [[], [temp]])
+		regrets = totalExpectedRegret(dist, [func3, func6], [], [[], [temp]])
+		print regrets
 		if regrets[0] >= regrets[1]:
 			guessBetter += 1
 	
