@@ -3,18 +3,21 @@ from operator import itemgetter
 from epsilonGreedy import epsilonGreedy
 from boltzmann import boltzmann
 from simplePoker import simplePoker
-from advPoker import advPoker
 from pureGuess import pureGuess
 from dist import *
 from boltzPoker import boltzPoker
+
+import sys
 
 """
 Returns total expected regret for a certain algorithm 
 run on a certain distribution
 """
-def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
-	# Generate Distribution
-	dist, muSigmaList = distributionMethod(*distParams)
+def totalExpectedRegret((dist, muSigmaList), distributionMethod, algorithms, distParams, algParams):
+	if dist is None:
+		# Generate Distribution
+		dist, muSigmaList = distributionMethod(*distParams)
+	
 	numRounds = len(dist)
 	
 	# Get means of each distribution
@@ -30,7 +33,6 @@ def totalExpectedRegret(distributionMethod, algorithms, distParams, algParams):
 	
 	# Calculate expected regret for each algorithm for this distribution
 	for alg in algorithms:
-		print "------"
 		armChoices = alg(dist, *(algParams[algParamIndex]))
 	
 		# print out choices 
@@ -70,25 +72,77 @@ def printChoices(name, armChoices, meanList):
 		print "Round %r: Index: %r, Mean: %r " % (round, choice, meanList[choice])
 		round += 1
 		
+"""
+Print max regret for a certain distribution and number of Rounds
+"""
+def maxRegret((dist, muSigmaList)):
+	numRounds = len(dist)
+	maxMean = max(muSigmaList, key = itemgetter(0))[0]
+	minMean = min(muSigmaList, key = itemgetter(0))[0]
+
+	# Calculate max regret
+	regret = (maxMean - minMean) * numRounds
 	
+	return regret
 	
 # Test main
 if __name__ == '__main__':
+	# Functions ordered in terms of stability
 	func1 = epsilonGreedy
-	dist = getDistFromFile
-	numArms = 10
-	rounds = 100
-	epsilon = 0.2
+	func2 = simplePoker
+	func3 = boltzmann
+	func4 = boltzPoker
 	
-	func2 = boltzmann
-	temp = 0.01
+	# Command line arguments (1. dist; 2. num of rounds; 3. num of trial)
+	distNo = int((sys.argv)[1])
+	numRounds = int((sys.argv)[2])
+	numTrials = int((sys.argv)[3])
+	numArms = 100
 	
-	func3 = simplePoker
+	# Generate distribution
+	dist, muSigmaList = getDist(numArms, numRounds, distNo)
 	
-	func4 = advPoker
-	func5 = pureGuess
-	func6 = boltzPoker
+	# Optimal Epsilon 
+	epsilon = 0.1
 	
+	# Optimal Temp(boltz)
+	tempBoltz = 0.007
+	
+	# Optial Temp(bolz-Poker)
+	tempBoltzPoker = 0.007
+	
+	print("Max Regret: ", maxRegret((dist, muSigmaList)))
+	
+	# Do each function 
+	print("Doing epsilon-Greedy")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func1], [numArms, numRounds], [[epsilon]])[0]
+		
+	print("Regret: ", sum/numTrials)	
+	
+	print("Doing simple Poker")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[]])[0]
+		
+	print("Regret: ", sum/numTrials)	
+	
+	print("Doing botzmann")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func3], [numArms, numRounds], [[tempBoltz]])[0]
+		
+	print("Regret: ", sum/numTrials)	
+	
+	print("Doing boltzmann-poker")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func4], [numArms, numRounds], [[tempBoltzPoker]])[0]
+		
+	print("Regret: ", sum/numTrials)	
+	
+	"""
 	numTrials = 20
 	guessBetter = 0.0
 	for i in range(0, numTrials):
@@ -98,7 +152,4 @@ if __name__ == '__main__':
 		print regrets
 		if regrets[0] >= regrets[1]:
 			guessBetter += 1
-	
-	print guessBetter/numTrials
-		
-	#print regrets 
+	"""
