@@ -46,7 +46,6 @@ def boltzPoker(distList, temp):
 		secondRandomIndex = np.random.randint(0, high=numArms)
 	
 	for roundIndex in range(0, numRounds): 
-		print roundIndex
 		seenUnknown = False # flags whether we have looked at an arm with count = 0
 		unknownVal = float("-inf") # stores val for arms with 0 count to avoid repeat calculation
 		armValues = []

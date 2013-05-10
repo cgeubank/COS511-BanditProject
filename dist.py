@@ -65,7 +65,7 @@ def getDistFromFile():
 # Generates the distribution on the arms with some probability
 # Returns list of lists where first level list is by round
 # and within each list, it is the number produced by an arm 
-def getDist(numArms, numRounds):
+def getDist(numArms, numRounds, distDecision = 0):
 	distList = []
 	muSigmaList = []
 	
@@ -73,12 +73,11 @@ def getDist(numArms, numRounds):
 		distList.append([])
 	
 	for armIndex in range(0, numArms):
-		distDecision = 0 # for now, we just want to use the normal distribution
 		if distDecision == 0:
 			dist, muSigma = normalDistribution(numRounds)
-		elif distDecision < 0.50:
+		elif distDecision == 1:
 			dist, muSigma = inverseGaussian(numRounds)
-		elif distDecision < 1.0:
+		elif distDecision == 2:
 			dist, muSigma = gumbel(numRounds)
 			
 		for i in range(0, numRounds):
