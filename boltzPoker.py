@@ -46,6 +46,9 @@ def boltzPoker(distList, temp):
 		secondRandomIndex = np.random.randint(0, high=numArms)
 	
 	for roundIndex in range(0, numRounds): 
+		print roundIndex
+		seenUnknown = False # flags whether we have looked at an arm with count = 0
+		unknownVal = float("-inf") # stores val for arms with 0 count to avoid repeat calculation
 		armValues = []
 		if (roundIndex > 3):
 			q = 0
@@ -69,11 +72,17 @@ def boltzPoker(distList, temp):
 			# Find arm with best score
 			bestVal = float("-inf")
 			bestIndex = -1
+			avgMean = averageMean(observedMeans)
+			avgStd = averageStdDev(observedStdDevs)  # QUESTION: DO WE NORMALIZE THIS AS WELL?
 			for j in range(0, numArms):
 				# Get observed Mean for arm
 				total, squaredtotal, count = observedMeans[j]
+
+				if count == 0 and seenUnknown:
+					armValues.append(unknownVal)
+					continue
 				if (count == 0):
-					mean = averageMean(observedMeans)
+					mean = avgMean
 				else:
 					mean = total/count
 					
@@ -81,17 +90,17 @@ def boltzPoker(distList, temp):
 				if count > 1:
 					stdDev = observedStdDevs[j] / math.sqrt(count)
 				else:
-					stdDev = averageStdDev(observedStdDevs) # QUESTION: DO WE NORMALIZE THIS AS WELL?
+					stdDev = avgStd
 				
 				# Calculate Integral
 				normalProbDist = lambda x : (1/(math.sqrt(2 * math.pi * stdDev))) * math.exp(-((x - mean) * (x - mean))/(2 * stdDev * stdDev))
 				intg = integrate.quad(normalProbDist, highestObservedMean + delta, inf)[0]
-				
-				#print "normal", intg
-				
+								
 				# Calculate score for arm				
 				value = mean + delta*(numRounds - roundIndex) * intg
-				#print "score", value, "index", j 
+				if count == 0:
+					unknownVal = value
+					seenUnknown = True
 				
 				# Maintain arm with best score
 				armValues.append(value)
@@ -170,9 +179,9 @@ def calcBoltzProb(observedValues, temp):
 	
 # Test main
 if __name__ == '__main__':
-	dlist, muSigmaList = getPathologicalDist(10,50,.5,1)#getDist(5, 50)
-	#for list in dlist:
-		#print list
+	dlist, muSigmaList = getDist(5, 10)
+	for list in dlist:
+		print list
 	
 	# Get means of each distribution
 	#meanList = []

@@ -35,12 +35,10 @@ def getDistFromFile():
 			for reward in line:
 				distList[lineCount - 2].append(-1.0 * float(reward)) # negative rewards since we are dealing with payoffs
 
-	# Given that the values are in integers, add a small bit of noise to entries whose first two entries are equal
-	# So as to prevent segmentation faults in which the case the standard deviations are 0
+	# Given that the values are in integers, add a small bit of Gaussian noise to prevent std. dev of 0
 	for armIndex in range(0, numArms):
-		for roundIndex in range(1, numRounds):
-			if distList[roundIndex][armIndex] == distList[roundIndex - 1][armIndex]:
-				distList[roundIndex][armIndex] += 0.0001
+		for roundIndex in range(0, numRounds):
+			distList[roundIndex][armIndex] += np.random.normal(0, 1)
 			
 	# Calculate mean and standard deviation from reward info
 	for armIndex in range(0, numArms):
@@ -148,10 +146,36 @@ def gumbel(numRounds):
 	sigma = math.sqrt(var)
 	
 	return dist, (mu, sigma)
+
+# Normalize the distribution so means are in [0,1]
+# Does not do anything to standard deviations
+def normalizeDist(dlist, meanList):
+	numRounds = len(dlist)
+	numArms = len(dlist[0])
+
+	minVal = float("inf")
+	maxVal = float("-inf")
+	
+	for i in range(0, len(meanList)):
+		(mu, sigma) = meanList[i]
+		if mu < minVal:
+			minVal = mu
+		if mu > maxVal:
+			maxVal = mu
+
+	for i in range(0, len(meanList)):
+		(mu, sigma) = meanList[i]
+		meanList[i] = ((mu-minVal)/(maxVal-minVal), sigma)
+
+	for armIndex in range(0, numArms):
+		for roundIndex in range(1, numRounds):
+			dlist[roundIndex][armIndex] = (dlist[roundIndex][armIndex]-minVal)/(maxVal-minVal)
+
+	return dlist, meanList
 	
 # Test main
 if __name__ == '__main__':
 	dlist, meanList = getDistFromFile() #getDist(5, 10)
-	#for list in dlist:
-		#print list
+	for list in dlist:
+		print list
 		

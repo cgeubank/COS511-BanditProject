@@ -24,9 +24,33 @@ def boltzmann(distList, temp):
 	observedMeans = []
 	for arm in range(0, numArms):
 		observedMeans.append((0.0,0))
-		
+
 	for roundIndex in range(0, numRounds):
-		probs = calcBoltzProb(observedMeans, temp)
+
+		#normalize means to prevent overflow
+		normalizedMeans = []
+		minVal = float("inf")
+		maxVal = float("-inf")
+		for (total, count) in observedMeans:
+			if count == 0:
+				continue
+			mean = total/count
+			if mean < minVal:
+				minVal = mean
+			if mean > maxVal:
+				maxVal = mean
+		
+		for (total, count) in observedMeans:
+			if count == 0:
+				normalizedMeans.append(0.0)
+				continue
+			mean = total/count
+			if minVal == maxVal:
+				normalizedMeans.append(mean)
+				continue
+			normalizedMeans.append((mean-minVal)/(maxVal-minVal))
+
+		probs = calcBoltzProb(normalizedMeans, temp)
 		
 		boltzDist = rv_discrete(name='custm', values=[tuple(indices), tuple(probs)])
 		armIndex = boltzDist.rvs(size=1)[0]
@@ -45,22 +69,16 @@ def boltzmann(distList, temp):
 Gives Boltzmann probability distribution according to the observed mean of
 choices 
 """
-def calcBoltzProb(observedMeans,temp):
+def calcBoltzProb(observedValues, temp):
 	l = []
-	sum = 0
-	for total, count in observedMeans:
-		if count != 0:
-			sum += math.exp((total/count)/temp)
-		else:
-			sum += 1
+	sum = 0.0
+	for value in observedValues:
+		sum += math.exp(value/temp)
 	
-	for total, count in observedMeans:
-		if count != 0:
-			l.append(math.exp((total/count)/temp)/sum)
-		else:
-			l.append((1.0/sum))
-	
-	return l	
+	for value in observedValues:
+		l.append(math.exp(value/temp)/sum)
+
+	return l
 	
 # Test main
 if __name__ == '__main__':

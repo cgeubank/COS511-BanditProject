@@ -177,11 +177,13 @@ During each round $\texttt{boltzPoker}$ (other than the four initialization roun
 
 In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the "goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
 
-
+As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
 
 
 
 \section{Experiments}
+
+FILLER\footnote{We have made all our code available at \texttt{https://github.com/cgeubank/COS511-BanditProject}}
 
 \section{Conclusion}
 

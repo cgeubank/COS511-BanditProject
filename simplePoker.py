@@ -38,6 +38,8 @@ def simplePoker(distList):
 		secondRandomIndex = np.random.randint(0, high=numArms)
 	
 	for roundIndex in range(0, numRounds): 
+		bestVal = float("-inf")
+		seenUnknown = False # flags whether we have looked at an arm with count = 0
 		if (roundIndex > 3):
 			q = 0
 			for (reward, squaredreward, times) in observedMeans:
@@ -58,13 +60,18 @@ def simplePoker(distList):
 			delta = (highestObservedMean - highestQMean)/math.sqrt(q)
 			
 			# Find arm with best score
-			bestVal = float("-inf")
+			bbestVal = float("-inf")
 			bestIndex = -1
+			avgMean = averageMean(observedMeans)
+			avgStd = averageStdDev(observedStdDevs)  # QUESTION: DO WE NORMALIZE THIS AS WELL?
 			for j in range(0, numArms):
 				# Get observed Mean for arm
 				total, squaredtotal, count = observedMeans[j]
+
+				if count == 0 and seenUnknown:
+					continue
 				if (count == 0):
-					mean = averageMean(observedMeans)
+					mean = avgMean
 				else:
 					mean = total/count
 					
@@ -72,22 +79,21 @@ def simplePoker(distList):
 				if count > 1:
 					stdDev = observedStdDevs[j] / math.sqrt(count)
 				else:
-					stdDev = averageStdDev(observedStdDevs) # QUESTION: DO WE NORMALIZE THIS AS WELL?
+					stdDev = avgStd
 				
 				# Calculate Integral
 				normalProbDist = lambda x : (1/(math.sqrt(2 * math.pi * stdDev))) * math.exp(-((x - mean) * (x - mean))/(2 * stdDev * stdDev))
 				intg = integrate.quad(normalProbDist, highestObservedMean + delta, inf)[0]
-				
-				#print "normal", intg
-				
+								
 				# Calculate score for arm				
 				value = mean + delta*(numRounds - roundIndex) * intg
-				#print "score", value, "index", j 
-				
+				if count == 0:
+					seenUnknown = True				
 				# Maintain arm with best score
 				if (value > bestVal):
 					bestVal = value
 					bestIndex = j
+	
 		elif roundIndex <= 1:
 			bestIndex = firstRandomIndex
 		elif roundIndex <= 3:
