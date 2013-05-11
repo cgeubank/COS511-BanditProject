@@ -1,4 +1,3 @@
-from algorithms import *
 from operator import itemgetter
 from epsilonGreedy import epsilonGreedy
 from boltzmann import boltzmann
@@ -128,7 +127,7 @@ if __name__ == '__main__':
 		
 	print("Regret: ", sum/numTrials)	
 	
-	print("Doing botzmann")
+	print("Doing boltzmann")
 	sum = 0
 	for trial in range(0, numTrials):
 		sum += totalExpectedRegret((dist, muSigmaList), None, [func3], [numArms, numRounds], [[tempBoltz]])[0]
@@ -142,14 +141,3 @@ if __name__ == '__main__':
 		
 	print("Regret: ", sum/numTrials)	
 	
-	"""
-	numTrials = 20
-	guessBetter = 0.0
-	for i in range(0, numTrials):
-		print i
-		#regrets = totalExpectedRegret(dist, [func1, func2, func3, func4], [numArms, rounds], [[epsilon], [temp], [], []])
-		regrets = totalExpectedRegret(dist, [func3, func6], [], [[], [temp]])
-		print regrets
-		if regrets[0] >= regrets[1]:
-			guessBetter += 1
-	"""

@@ -143,10 +143,9 @@ Let us now discuss the calculation of the second term.
 
 The authors' proof that Poker is a zero regret strategy hinges upon considering an infinite horizon and thus considering the behavior of their price function as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that we know the number of rounds in advance or, as the authors suggest in the case in which the number of rounds is unknown, we consider $H$ to be a fixed parameter.
 
-Recall that the initialization of Poker requires the algorithm to pull two random arms twice.
+Recall that the initialization of Poker requires the algorithm to pull two random arms twice. We present a simple set of levers that will cause Poker to perform extremely poorly with a nontrivial probability.
 
-
-Let rewards be in $[0,1]$ \\
+Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$ and the same standard deviation $\sigma$. We consider $(1-p)$ levers to be good (i.e. they all have rewards of 1) and the other $p$ levers to be bad. We consider the levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$.
 
 \noindent
 \textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$ each round) is $O(p^{2})$. \\ 
