@@ -14,8 +14,9 @@ import sys
 if __name__ == '__main__':
 	# Functions ordered in terms of stability
 	func1 = epsilonGreedy
-	func2 = boltzmann
-	func3 = boltzPoker
+	func2 = greedyPoker
+	func3 = boltzmann
+	func4 = boltzPoker
 	
 	# Command line arguments (1. dist; 2. num of rounds; 3. num of trial)
 	distNo = int((sys.argv)[1])
@@ -38,22 +39,31 @@ if __name__ == '__main__':
 			for trial in range(0, numTrials):
 				sum += totalExpectedRegret((dist, muSigmaList), None, [func1], [numArms, numRounds], [[epsilon]])[0]
 		
-			print sum/numTrials	
-	
+			print sum/numTrials
+
 	if algType == 2:
-		print("Doing boltzmann from 0.1 to 0.5 in increments of 0.05")
-		for tempBoltz in np.arange(0.05, 0.5, 0.05):
+		print("Doing greedyPoker from 0.05 to 1 in increments of 0.05")
+		for epsilon in np.arange(0.05, 1, 0.05):
 			sum = 0
 			for trial in range(0, numTrials):
-				sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[tempBoltz]])[0]
+				sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[epsilon]])[0]
 		
 			print sum/numTrials	
 	
 	if algType == 3:
-		print("Doing boltzmann-poker from 0.1 to 0.5 in increments of 0.05")
+		print("Doing boltzmann from 0.05 to 0.5 in increments of 0.05")
 		for tempBoltz in np.arange(0.05, 0.5, 0.05):
 			sum = 0
 			for trial in range(0, numTrials):
-				sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[tempBoltz]])[0]	
+				sum += totalExpectedRegret((dist, muSigmaList), None, [func3], [numArms, numRounds], [[tempBoltz]])[0]
+		
+			print sum/numTrials	
+	
+	if algType == 4:
+		print("Doing boltzmann-poker from 0.05 to 0.5 in increments of 0.05")
+		for tempBoltz in np.arange(0.05, 0.5, 0.05):
+			sum = 0
+			for trial in range(0, numTrials):
+				sum += totalExpectedRegret((dist, muSigmaList), None, [func4], [numArms, numRounds], [[tempBoltz]])[0]	
 
 			print sum/numTrials

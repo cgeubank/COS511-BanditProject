@@ -1,12 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%  Template for creating scribe notes for cos511.
-%
-%  Fill in your name, lecture number, lecture date and body
-%  of scribe notes as indicated below.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%% COS 511 PROJECT REPORT
 
 \documentclass[12pt]{article}
 
@@ -150,26 +142,22 @@ $$
 
 \section{Algorithm}
 
-\subsection{Motivation (IN PROGRESS)}
+\subsection{Motivation}
 
 The authors' proof that Poker is a zero regret strategy hinges upon considering an infinite horizon and thus considering the behavior of their price function as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that we know the number of rounds in advance or, as the authors suggest in the case in which the number of rounds is unknown, we consider $H$ to be a fixed parameter.
 
 Recall that the initialization of Poker requires the algorithm to pull two random arms twice. We present a simple set of levers that will cause Poker to perform extremely poorly with a nontrivial probability.
 
-Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$ and the same standard deviation $\sigma$. We consider $(1-p)$ levers to be good (i.e. they all have rewards of 1) and the other $p$ levers to be bad. We consider the levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$.
+Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$ and the same standard deviation $\sigma$. We consider $(1-p)$ levers to be good (i.e. they all have rewards of 1) and the other $p$ levers to be bad. We consider the levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. \\
 
 \noindent
 \textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$ each round) is $O(p^{2})$. \\ 
 
-Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct (EXPLAIN WHY). Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
+Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct . Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
 
-In each turn, the algorithm sets $p_{i} = \hat{\mu}_{i} + \delta(T-t)\int_{x}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$
+In each turn, the algorithm sets $p_{i} = \hat{\mu}_{i} + \delta_{\mu}(T-t)\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$
 
-
-
-We have assumed that $H$ is finite and, by definition $\delta$ will be finite.
-
-SOMETHING ABOUT INTEGRALS
+We have assumed that $H$ is finite and, by definition $\delta_{m}$ will be finite. With respect $\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$, for all $i$, $\mu^{*}+\delta_{\mu}$ will be greater than $\mu_{i}$. As a result, as $\sigma \to 0$, the value of the integral also converges to 0.
 
 Thus, if sigma is arbitrarily close to $0$, $p_{i} \rightarrow \hat{\mu}_{i}$ and Poker will continue to greedily pick the lever with the highest empirical mean. Given that the unobserved levers have empirical means set equal to the average of the empirical means of levers 1 and 2, one of the two bad levers will have a strictly greater empirical mean.\footnote{We are ignoring the case that $\hat{\mu}_{1} = \hat{\mu}_{2}$ exactly because since the rewards are real numbers and their true means are different, the event of this strict equality holding is 0}
 
@@ -177,23 +165,25 @@ As a result, the algorithm initialized with two bad arms will greedily keep play
 
 Finally, the probability that Poker initializes by choosing two distinct bad arms is simply $({pK\over{K}})({p(K-1)\over{K}}) = ({K-1\over K})p^{2}$ desired.
 
-EMPIRICAL RESULTS
-
 \subsection{Our approach}
 
 While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with the Boltzmann algorithm.
 
 During each round $\texttt{boltzPoker}$ (other than the four initialization rounds), the algorithm calculates the values of $p_{i}$ as in the standard Poker algorithm. Next, the algorithm maps this vector of values into a probability vector in accordance to the Boltzmann distribution and a temperature parameter in the same as the standard Boltzmann algorithm maps the mean vector into probabilities. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.}
 
-In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the "goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
+In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
 
 As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
+
+Another logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \text{greedyPoker} converges to standard poker and as $\epsilon$ goes to 1, the algorithm converges to random guessing.
 
 \section{Experiments}
 
 FILLER\footnote{We have made all our code available at \texttt{https://github.com/cgeubank/COS511-BanditProject}}
 
 \section{Conclusion}
+
+
 
 \bibliographystyle{plain}
 \bibliography{references}
