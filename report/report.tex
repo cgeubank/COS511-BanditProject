@@ -124,8 +124,9 @@ Poker is a pricing strategy that assigns prices to each arm and at each round pi
 takes into account two pieces of information: exploitation (the reward received from this arm so far) and exploration (the knowledge that could be gained
 from pulling this arm).  
 
-Let $\mu^{*} = \max(\mu_1, \ldots, \mu_k)$ be the the highest mean and let $\hat{\mu}^{*} = \arg \max(\hat{\mu}_1, \ldots, \hat{\mu}_k))$ be the highest 
-observed empirical mean.  We know $\mu^{*} \ge \hat{\mu}^{*}$ and so $\mu^{*} - \hat{\mu}^{*}$ is the reward mean improvement.  We then denote 
+Let $\mu^{*} = \max(\mu_1, \ldots, \mu_k)$ be the the highest mean.  Supposing $j_{0}$ is the index of the arm with the highest observed empirical mean, 
+let $\hat{\mu}^{*} = \mu_{j_{0}}$ be the actual mean of this arm.
+We know $\mu^{*} \ge \hat{\mu}^{*}$ and so $\mu^{*} - \hat{\mu}^{*}$ is the reward mean improvement.  We then denote 
 $\delta_{\mu} = \mathbb{E}[\mu^{*} - \hat{\mu}^{*}]$ to be the expected reward improvement.
 
 At each round, the expected gain when pulling an arm $i$ is given by the expected reward improvement $\delta_{\mu}$ multiplied by the probability of an
@@ -136,7 +137,17 @@ p_i = \hat{\mu}_i + \Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}] \delta_{\mu} H,
 $$
 where $\hat{\mu}_i$ (the empirical average) represents the exploitation price and the second term represents the exploration price of this specific arm $i$. 
 
-Let us now discuss the calculation of the second term.
+Let us now discuss the calculation of the second term.  Suppose $\hat{\mu}_{i_1} > \ldots > \hat{\mu}_{i_q}$ be the ordered observed means of levers.  
+We let $\delta_u = \left(\hat{\mu}_{i_1} - \hat{\mu}_{i_{\sqrt{q}}} \right)/\sqrt{q}$.  The authors chose $\sqrt{q}$ here because they observe that it works well
+in practice and because it provides some nice properties.
+
+Let $\mathcal{N}(x, \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma}} \exp \left(\frac{(x - \mu)^2}{2 \sigma^2} \right)$ be the normal distribution.  
+Let $\hat{\mu}_i$ be the observed mean estimate, $\hat{\sigma}_i$ be the standard deviation estimate, and $n_i$ be the number of times the arm has been chosen, then
+we say
+$$
+\Pr[\mu_i \ge \hat{\mu}^{*} + \delta_u] \sim \int_{\hat{\mu}^{*} + \delta_{\mu}}^{\infty} \mathcal{N}\left(x, \hat{\mu}_{i}, \frac{\hat{\sigma}_i}{\sqrt{n_i}} \right)
+$$
+
 \section{Algorithm}
 
 \subsection{Motivation (IN PROGRESS)}
@@ -177,8 +188,6 @@ During each round $\texttt{boltzPoker}$ (other than the four initialization roun
 In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the "goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
 
 As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
-
-
 
 \section{Experiments}
 
