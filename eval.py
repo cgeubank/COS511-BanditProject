@@ -5,6 +5,7 @@ from simplePoker import simplePoker
 from pureGuess import pureGuess
 from dist import *
 from boltzPoker import boltzPoker
+from greedyPoker import *
 
 import sys
 
@@ -88,9 +89,11 @@ def maxRegret((dist, muSigmaList)):
 if __name__ == '__main__':
 	# Functions ordered in terms of stability
 	func1 = epsilonGreedy
-	func2 = simplePoker
-	func3 = boltzmann
-	func4 = boltzPoker
+	func2 = greedyPoker
+	func3 = simplePoker
+	func4 = boltzmann
+	func5 = boltzPoker
+	func6 = pureGuess
 	
 	# Command line arguments (1. dist; 2. num of rounds; 3. num of trial)
 	distNo = int((sys.argv)[1])
@@ -102,13 +105,16 @@ if __name__ == '__main__':
 	dist, muSigmaList = getDist(numArms, numRounds, distNo)
 	
 	# Optimal Epsilon 
-	epsilon = 0.1
+	epsilon = 0.07
+
+	# Optimal Epsilon for Poker
+	epsilonPoker = 0.07
 	
 	# Optimal Temp(boltz)
-	tempBoltz = 0.007
+	tempBoltz = 0.15
 	
 	# Optial Temp(bolz-Poker)
-	tempBoltzPoker = 0.007
+	tempBoltzPoker = 0.15
 	
 	print("Max Regret: ", maxRegret((dist, muSigmaList)))
 	
@@ -119,25 +125,40 @@ if __name__ == '__main__':
 		sum += totalExpectedRegret((dist, muSigmaList), None, [func1], [numArms, numRounds], [[epsilon]])[0]
 		
 	print("Regret: ", sum/numTrials)	
+
+	# Do each function 
+	print("Doing greedy Poker")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[epsilonPoker]])[0]
+		
+	print("Regret: ", sum/numTrials)
 	
 	print("Doing simple Poker")
 	sum = 0
 	for trial in range(0, numTrials):
-		sum += totalExpectedRegret((dist, muSigmaList), None, [func2], [numArms, numRounds], [[]])[0]
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func3], [numArms, numRounds], [[]])[0]
 		
 	print("Regret: ", sum/numTrials)	
 	
 	print("Doing boltzmann")
 	sum = 0
 	for trial in range(0, numTrials):
-		sum += totalExpectedRegret((dist, muSigmaList), None, [func3], [numArms, numRounds], [[tempBoltz]])[0]
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func4], [numArms, numRounds], [[tempBoltz]])[0]
 		
 	print("Regret: ", sum/numTrials)	
 	
 	print("Doing boltzmann-poker")
 	sum = 0
 	for trial in range(0, numTrials):
-		sum += totalExpectedRegret((dist, muSigmaList), None, [func4], [numArms, numRounds], [[tempBoltzPoker]])[0]
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func5], [numArms, numRounds], [[tempBoltzPoker]])[0]
 		
 	print("Regret: ", sum/numTrials)	
+
+	print("Doing purely random guessing")
+	sum = 0
+	for trial in range(0, numTrials):
+		sum += totalExpectedRegret((dist, muSigmaList), None, [func6], [numArms, numRounds], [[]])[0]
+		
+	print("Regret: ", sum/numTrials)
 	
