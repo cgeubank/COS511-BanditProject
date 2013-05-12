@@ -69,7 +69,7 @@ def greedyPoker(distList, epsilon):
 				bbestVal = float("-inf")
 				bestIndex = -1
 				avgMean = averageMean(observedMeans)
-				avgStd = averageStdDev(observedStdDevs)  # QUESTION: DO WE NORMALIZE THIS AS WELL?
+				avgStd = averageStdDev(observedStdDevs) 
 				for j in range(0, numArms):
 					# Get observed Mean for arm
 					total, squaredtotal, count = observedMeans[j]

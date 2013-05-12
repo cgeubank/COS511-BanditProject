@@ -173,15 +173,15 @@ Finally, the probability that Poker initializes by choosing two distinct bad arm
 
 \subsection{Our approach}
 
-While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with the Boltzmann algorithm.
+While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with algorithms that incorporate a greater degree of randomness.
 
-During each round $\texttt{boltzPoker}$ (other than the four initialization rounds), the algorithm calculates the values of $p_{i}$ as in the standard Poker algorithm. Next, the algorithm maps this vector of values into a probability vector in accordance to the Boltzmann distribution and a temperature parameter in the same as the standard Boltzmann algorithm maps the mean vector into probabilities. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.}
+A logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \text{greedyPoker} converges to standard poker and as $\epsilon$ goes to 1, the algorithm converges to random guessing.
 
-In terms of design, we anticipated that this modified algorithm would be more robust in dealing with the initial conditions when compared to Poker. We also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms in calculation of the Boltzmann probabilities when compared to just the sample means.
+Likewise, we consider merging Poker with the Boltzmann algorithm. During each round $\texttt{boltzPoker}$, the algorithm calculates the values of $p_{i}$ as in the standard Poker algorithm. Next, the algorithm maps this vector of values into a probability vector in accordance to the Boltzmann distribution and a temperature parameter in the same as the standard Boltzmann algorithm maps the mean vector into probabilities. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.} As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
 
-As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
+In terms of design, we anticipated that the modified algorithms would be more robust in dealing with the initial conditions when compared to Poker. Likewise,  we also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms in calculating the Boltzmann probabilities or picking the best arm in the $\epsilon$-greedy approach when compared to just the sample means.
 
-Another logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \text{greedyPoker} converges to standard poker and as $\epsilon$ goes to 1, the algorithm converges to random guessing.
+In terms of theoretical performance, we can set the algorithms' parameters to be such that they will act as if they were simply the standard Poker algorithm. By manipulating the parameters, we can guarantee that the algorithms will perform at least as well as the standard Poker algorithm. 
 
 \section{Experiments}
 
@@ -232,7 +232,11 @@ with $1000$ rounds, and averaged over multiple trials.  Please refer to Figure $
 
 \section{Conclusion}
 
+We present two canonical algorithms for the multi-armed bandit problem as well as Poker, a newer algorithm that incorporates the time horizon of a particular bandit instances as well as the sample standard deviations. We identify a theoretical weakness in the initialization process of the Poker algorithm and merge poker with the other two algorithms to create more robust versions of the algorithm that can incorporate a greater degree of randomness.
 
+After tuning the parameters for these algorithms, we find that \texttt{greedyPoker} in particular has a stronger performance than the Poker algorithm on random instances based on the Normal, Inverse Gaussian and Gumbel distribution. However, when using these algorithms on real data with the same tuned parameters, the standard Poker algorithm had a much better performance.
+
+Overall, while the modified algorithms we created have at least as good performance when compared to the standard  Poker algorithm given the correct tuning parameters, in practice the algorithms come with the issue that these parameters need to be tuned at the risk of having these algorithms actually performing much worse than standard Poker. Hence, against certain instances in which these tuning parameters are already known, these algorithms may present a superior level of expected regret. However, on real distributions whose properties are not known, the standard Poker algorithm may be theoretically more vulnerable with respect to its initial conditions but appears to have a consistently strong performance in practice.
 
 \bibliographystyle{plain}
 \bibliography{references}
