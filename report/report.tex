@@ -80,7 +80,7 @@ total number of rounds is $T$, \emph{total expected regret} is defined as
 \begin{align}
 R_T = T\mu^{*} - \sum_{i=1}^{T} \mu_{j(t)},
 \end{align}
-wher $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the highest expected reward from the best arm. 
+where $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the highest expected reward from the best arm. 
 
 We now present three previously conceived algorithms whose performance we use for comparison in our experiments:  $\epsilon$-greedy, Boltzmann exploration, and Poker.
 In the following, let $p_i(t)$ be the probability of picking arm $i$ at time $t$.
@@ -150,24 +150,24 @@ The pseudocode for the Poker algorithm is stated below.
 
 \subsection{Motivation}
 
-The authors' proof that Poker is a zero regret strategy hinges upon considering an infinite horizon and thus considering the behavior of their price function as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that we know the number of rounds in advance or, as the authors suggest in the case in which the number of rounds is unknown, we consider $H$ to be a fixed parameter.
+The authors' proof that Poker is a zero regret strategy hinges upon considering infinite horizons and considering the behavior of the price functions as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that the number of rounds is known in advance or, as the authors suggest in the case in which the number of rounds is unknown, the algorithm treats $H$ as a fixed parameter.
 
-Recall that the initialization of Poker requires the algorithm to pull two random arms twice. We present a simple set of levers that will cause Poker to perform extremely poorly with a nontrivial probability.
+Recall Poker initializes itself by pulling two random arms twice. We present a simple bandit instance that will cause Poker to perform extremely poorly with a nontrivial probability.
 
-Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$ and the same standard deviation $\sigma$. We consider $(1-p)$ levers to be good (i.e. they all have rewards of 1) and the other $p$ levers to be bad. We consider the levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. \\
+Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$.We consider $(1-p)$ levers to be good (i.e. they all have mean rewards of 1) and the other $p$ levers to be bad. We consider the bad levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. Finally, we assume all levers have the same standard deviation $\gamma$. \\
 
 \noindent
-\textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$ each round) is $O(p^{2})$. \\ 
+\textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$) each round is $O(p^{2})$. \\ 
 
-Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct . Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
+Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct. If the two arms were the same, all $\hat{\mu}_{i} and \hat{\sigma}_{i}$ would be equal and the following argument would fail. Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will have calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
 
 In each turn, the algorithm sets $p_{i} = \hat{\mu}_{i} + \delta_{\mu}(T-t)\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$
 
-We have assumed that $H$ is finite and, by definition $\delta_{m}$ will be finite. With respect $\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$, for all $i$, $\mu^{*}+\delta_{\mu}$ will be greater than $\mu_{i}$. As a result, as $\sigma \to 0$, the value of the integral also converges to 0.
+We have assumed that $H$ is finite and, by definition $\delta_{m}$ will be finite. With respect $\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$, for all $i$, $\mu^{*}+\delta_{\mu}$ will be greater than $\mu_{i}$. As a result, as $\sigma \to 0$, $\hat{\sigma}_{i} \to 0$ and the value of the integral also converges to 0.
 
-Thus, if sigma is arbitrarily close to $0$, $p_{i} \rightarrow \hat{\mu}_{i}$ and Poker will continue to greedily pick the lever with the highest empirical mean. Given that the unobserved levers have empirical means set equal to the average of the empirical means of levers 1 and 2, one of the two bad levers will have a strictly greater empirical mean.\footnote{We are ignoring the case that $\hat{\mu}_{1} = \hat{\mu}_{2}$ exactly because since the rewards are real numbers and their true means are different, the event of this strict equality holding is 0}
+Thus, if $\sigma$ is arbitrarily close to $0$, $p_{i} \rightarrow \hat{\mu}_{i}$ and Poker will continue to greedily pick the lever with the highest empirical mean. Given that the unobserved levers have empirical means set equal to the average of the empirical means of levers 1 and 2, one of the levers pulled during initialization will have a strictly greater empirical mean.\footnote{We are ignoring the case that $\hat{\mu}_{1} = \hat{\mu}_{2}$ exactly because since the rewards are real numbers and their true means are different, the probability of this strict equality holding is 0}
 
-As a result, the algorithm initialized with two bad arms will greedily keep playing one of these two bad arms for the entire time game. Give that the maximum payout is 1 and the best payout of any bad arm is $\gamma$, the expected regret per round will be at least $1-\gamma$. 
+As a result, the algorithm initialized with two bad arms will greedily keep playing one of these two bad arms for the entire time frame. Give that the maximum payout is 1 and the best payout of any bad arm is $\gamma$, the expected regret per round will be at least $1-\gamma$. 
 
 Finally, the probability that Poker initializes by choosing two distinct bad arms is simply $({pK\over{K}})({p(K-1)\over{K}}) = ({K-1\over K})p^{2}$ desired.
 
@@ -175,13 +175,13 @@ Finally, the probability that Poker initializes by choosing two distinct bad arm
 
 While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with algorithms that incorporate a greater degree of randomness.
 
-A logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \text{greedyPoker} converges to standard poker and as $\epsilon$ goes to 1, the algorithm converges to random guessing.
+A logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \texttt{greedyPoker} converges to standard Poker and as $\epsilon$ goes to 1, the algorithm converges to guessing.
 
-Likewise, we consider merging Poker with the Boltzmann algorithm. During each round $\texttt{boltzPoker}$, the algorithm calculates the values of $p_{i}$ as in the standard Poker algorithm. Next, the algorithm maps this vector of values into a probability vector in accordance to the Boltzmann distribution and a temperature parameter in the same as the standard Boltzmann algorithm maps the mean vector into probabilities. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.} As the temperature parameter $\tau$ goes to 0, boltzPoker acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
+Likewise, we consider merging Poker with the Boltzmann algorithm. During each round $\texttt{boltzPoker}$, the algorithm calculates the vector of $p_{i}$ values. Next, the algorithm maps this vector of values into probabilities vector in accordance to the Boltzmann distribution and a temperature parameter. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.} As the temperature parameter $\tau$ goes to 0, \texttt{boltzPoker} acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
 
-In terms of design, we anticipated that the modified algorithms would be more robust in dealing with the initial conditions when compared to Poker. Likewise,  we also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms in calculating the Boltzmann probabilities or picking the best arm in the $\epsilon$-greedy approach when compared to just the sample means.
+In terms of design, we anticipated that the modified algorithms would be more robust in dealing with the initial conditions when compared to Poker due to incorporation of additional randomness. Likewise,  we also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms as compared to the sample means used in the basic Boltzmann and $\epsilon$-greedy algorithms.
 
-In terms of theoretical performance, we can set the algorithms' parameters to be such that they will act as if they were simply the standard Poker algorithm. By manipulating the parameters, we can guarantee that the algorithms will perform at least as well as the standard Poker algorithm. 
+In terms of theoretical performance, we can set the algorithms' parameters to be such that they will act as if they were simply the standard Poker algorithm. By manipulating the parameters, we can guarantee that the algorithms will perform at least as well as the standard Poker algorithm. However, finding these ideal parameters for every distribution (assuming they exist) is not necessarily a trivial task and requires extensive experimentation.
 
 \section{Experiments}
 
@@ -232,11 +232,11 @@ with $1000$ rounds, and averaged over multiple trials.  Please refer to Figure $
 
 \section{Conclusion}
 
-We present two canonical algorithms for the multi-armed bandit problem as well as Poker, a newer algorithm that incorporates the time horizon of a particular bandit instances as well as the sample standard deviations. We identify a theoretical weakness in the initialization process of the Poker algorithm and merge poker with the other two algorithms to create more robust versions of the algorithm that can incorporate a greater degree of randomness.
+We present two canonical algorithms for the multi-armed bandit problem as well as Poker, a newer algorithm that incorporates the time horizon of a particular bandit instances as well as the sample standard deviations. We identify a theoretical weakness in the initialization process of the Poker algorithm and merge Poker with the other two algorithms to create more robust versions of the algorithm.
 
 After tuning the parameters for these algorithms, we find that \texttt{greedyPoker} in particular has a stronger performance than the Poker algorithm on random instances based on the Normal, Inverse Gaussian and Gumbel distribution. However, when using these algorithms on real data with the same tuned parameters, the standard Poker algorithm had a much better performance.
 
-Overall, while the modified algorithms we created have at least as good performance when compared to the standard  Poker algorithm given the correct tuning parameters, in practice the algorithms come with the issue that these parameters need to be tuned at the risk of having these algorithms actually performing much worse than standard Poker. Hence, against certain instances in which these tuning parameters are already known, these algorithms may present a superior level of expected regret. However, on real distributions whose properties are not known, the standard Poker algorithm may be theoretically more vulnerable with respect to its initial conditions but appears to have a consistently strong performance in practice.
+Overall, while the modified algorithms we created have at least as good performance when compared to the standard Poker algorithm given the correct tuning parameters. Hence, against certain instances in which these tuning parameters are already known, these algorithms may present a superior level of expected regret. However, on real distributions whose properties are not known, the standard Poker algorithm may be theoretically more vulnerable with respect to its initial conditions but appears to have a consistently strong performance in practice.
 
 \bibliographystyle{plain}
 \bibliography{references}
