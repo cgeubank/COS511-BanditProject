@@ -149,28 +149,29 @@ $$
   \State
   \State Pick two different random arms twice each; update $\mu$, $\sigma$, and $N$
     \For{$t = 5$ to $T$}
+    	\State $p_{max} \gets -\infty$
         \State $q \gets |\{i \, : \, N[i] > 0\}|$
         \State $i_{*} \gets \arg \max_{i} \{\mu[i]\}$
         \State $i_{\sqrt{q}} \gets j$ s.t. $|\{i : u[i] > u[j]\}| = \sqrt{q}$
         \State $\delta_{\mu} \gets \frac{\mu[i_{*}] - \mu[i_{\sqrt{q}}]}{\sqrt{q}}$ 
         \For{$i = 1$ to $K$}
             \If{$N[i] > 0$}
-                \State $\bar{\mu} \gets Avg(\mu)$ 
+               \State $\bar{\mu} \gets \mu[i]$ 
             \Else 
-                \State $\bar{\mu} \gets \mu[i]$ 
+                \State $\bar{\mu} \gets \texttt{AVG}(\mu)$ 
             \EndIf
             \If{$N[i] > 1$}
-                \State $\bar{\sigma} \gets Avg(\sigma)$ 
+                    \State $\bar{\sigma} \gets {\sigma[i] \over{\sqrt{N[i]}}}$
             \Else
-                \State $\bar{\sigma} \gets \sigma[i]$ 
+               \State $\bar{\sigma} \gets \texttt{AVG}(\sigma)$ 
             \EndIf
-        \State $p \gets \bar{\mu} + \delta_{\mu}(T - t) + \int_{\mu[i_*] + \delta_{\mu}}^{\infty} \mathcal{N}\left(x, \bar{\mu}, \frac{\bar{\sigma}}{\sqrt{N[i]}} \right) dx$
+        \State $p \gets \bar{\mu} + \delta_{\mu}(T - t) + \int_{\mu[i_*] + \delta_{\mu}}^{\infty} \mathcal{N}\left(x, \bar{\mu}, \bar{\sigma} \right) dx$
         \If{$p > p_{max}$} 
-            \State$p \gets p_{max}$
+            \State$p_{max} \gets p$
             \State $i_{max} \gets i$ 
         \EndIf
         \EndFor
-        \State Pick arm $i_{max}$ and update $\mu$, $\sigma$, and $N$
+        \State Pick arm $i_{max}$, receive reward $r$ and update $\mu$, $\sigma$, and $N$ accordingly
     \EndFor
   \end{algorithmic}
 \end{algorithm}
