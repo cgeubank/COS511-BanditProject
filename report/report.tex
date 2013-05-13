@@ -180,7 +180,7 @@ The pseudocode for the Poker algorithm is stated below.
 
 \subsection{Motivation}
 
-The authors' proof that Poker is a zero regret strategy hinges upon considering infinite horizons and considering the behavior of the price functions as $H$ approaches infinity. However, in practice the value of $H$ will be finite either due to the fact that the number of rounds is known in advance or, as the authors suggest in the case in which the number of rounds is unknown, the algorithm treats $H$ as a fixed parameter.
+The authors' proof that Poker is a zero regret strategy hinges upon considering infinite horizons and considering the behavior of the price functions as $H$ approaches infinity.\footnote{The authors specifically seek to prove that there does not exist a lever that provides high regret that is pulled many times by the algorithm with a non-trivial probability.} However, in practice the value of $H$ will be finite either due to the fact that the number of rounds is known in advance or, as the authors suggest in the case in which the number of rounds is unknown, the algorithm treats $H$ as a fixed parameter.
 
 Recall Poker initializes itself by pulling two random arms twice. We present a simple bandit instance that will cause Poker to perform extremely poorly with a nontrivial probability.
 
