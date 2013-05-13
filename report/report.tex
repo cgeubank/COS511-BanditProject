@@ -50,43 +50,44 @@ May 14, 2013           %%% FILL IN LECTURE DATE HERE
 \medskip
 
 \section{Introduction}
-In this paper, we study the stochastic multi-armed bandit problem. Here, a player is  
-faced with a row of slot machines (``arms'') and must decide in each round which machine
-to play.  Each of the arms when picked provides a random reward to the player from the distribution
-specific to the machine. The goal of the player is to maximize the sum of rewards received through a
+
+We study the stochastic multi-armed bandit problem and present robust modifications to existing algorithms. In the bandit problem, a player is  
+faced with a row of slot machines (``arms'') and, during each round of the game, pulls a single arm.  When chosen by the player, an arm provides a random reward according to its machine-specific distribution. The player's goal is to maximize the sum of rewards received through a
 sequence of selections.  
 
-These problems are the most basic examples of decision games where the player is faced with an 
-exploration-exploitation faceoff.  Exploitation is routinely picking the arm that gives a high reward,
-whereas exploration involves trying out new arms which may or may not give a higher reward. 
+An agent playing the bandit game is faced with the classic exploration-exploitation tradeoff.  On the one hand, the agent will want to 
+exploit the best arm he has found so far by repeatedly pulling it. On the other hand, he could explore other options,
+which may or may not offer a higher reward.
 
-Though the original motivation (which still remains relevant) for the problem was clinical trials, many 
-new applications have arisen.  One application is in ad placement, where we want to decide which advertisement
-to show the next visitor to a website.  For example, in \cite{Chakrabarti}, the authors formulate a modified version
-of the problem, where arms have a lifetime after which they expire.  This expiration helps model ads, which often 
-have limited lifetimes due to their content and campaign budgets.  Another application is in Web document ranking.  
-Here, the user searches for a topic and relevant documents must be ranked to be shown to the user.  In \cite{Radlinski}, 
-the authors propose an online learning method using multi-armed bandit algorithms that produces rankings from usage data.   
+Although the original motivation for the problem, which continues relevant (e.g. \cite{Cassell}), was scheduling clinical trials, many 
+new applications have arisen.  One application is in ad placement, in which pulling an arm represents displaying an ad which, in turn,
+provides some financial reward.  In \cite{Chakrabarti}, the authors formulate a modified version
+of the problem, where arms have a lifetime after which they expire. This expiration helps to model ads, which often 
+have limited lifetimes due to their content and campaign budgets.  Another application is in Web document ranking, 
+in which, given a user's query, a site seeks to optimally rank and display relevant documents.
+In \cite{Radlinski}, the authors propose an online learning method using multi-armed bandit algorithms that produces rankings from usage data.   
 
 \section{Background}
-We now review the fundamental formalization of the bandit problem. The problem consists of a set of $K$ probability distributions
-$(D_1, \ldots, D_k)$ with associated expected values $(\mu_1, \ldots, \mu_k)$ and variances $(\sigma^2_1, \ldots, \sigma^2_k)$.
-In the beginning, the $D_i$ are unknown to the player.  At each round $t = 1,2,\ldots,T$, the player selects an arm with index $j(t)$
+Formally, the multi-armed bandit problem consists of a set of $K$ probability distributions
+$(D_1, \ldots, D_k)$ with associated expected values $(\mu_1, \ldots, \mu_k)$.
+Initially, the distributions $D_i$ are unknown to the player.  At each round $t = 1,2,\ldots,T$, the player selects an arm with index $j(t)$
 and receives a reward $r(t) \sim D_{j(t)}$ and player's goal is to maximize his received reward summed over all rounds.  A bandit algorithm
 specifies a strategy by which the player should choose an arm $j(t)$ in each round.
 
-The most popular performance measure (according to \cite{Kuleshov}) for bandit algorithms is \emph{total expected regret}.  Assuming the 
+According to \cite{Kuleshov}, the most popular performance measure for bandit algorithms is \emph{total expected regret}.  Assuming the 
 total number of rounds is $T$, \emph{total expected regret} is defined as
-\begin{align}
+$$
 R_T = T\mu^{*} - \sum_{i=1}^{T} \mu_{j(t)},
-\end{align}
-where $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the highest expected reward from the best arm. 
+$$
+where $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the expected reward from the best arm. 
 
-We now present three previously conceived algorithms whose performance we use for comparison in our experiments:  $\epsilon$-greedy, Boltzmann exploration, and Poker.
-In the following, let $p_i(t)$ be the probability of picking arm $i$ at time $t$.
+As background for our approach to the problem, we present three pre-existing bandit algorithms: $\epsilon$-greedy, Boltzmann exploration and Poker.
+For the next two subsections, let $p_i(t)$ be the probability of picking arm $i$ at time $t$.
 
 \subsection{$\epsilon$-greedy}
-The $\epsilon$-greedy algorithm is widely used because it is a simple heuristic that performs great in practice. 
+
+The $\epsilon$-greedy algorithm is an extremely simple heuristic. \cite{Auer} refer to prior results guaranteeing at least a logarithmic level of regret and note that a greedy approach with a dynamic value of $\epsilon$ can provide a polylogarithmic guarantee.
+
 At each round $t = 1, \ldots, T$, the algorithm selects the arm with the highest observed empirical mean with probability $1 - \epsilon$ and
 selects a random arm with probability $\epsilon$.  More specifically, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
 \begin{align*}
@@ -97,56 +98,52 @@ p_i(t+1) =
 \end{cases}
 \end{align*}
 
-The value of $\epsilon$ is a parameter in this method, and smaller values of $\epsilon$ will cause less exploration and more exploitation, whereas
-larger values of $\epsilon$ will cause more exploration and less exploitation.
+Smaller values of the parameter $\epsilon$ will cause less exploration and more exploitation whereas larger values lead to comparatively more exploration. 
 
 \subsection{Boltzmann Exploration}
-In the $\epsilon$-greedy method, we do exploration by uniformly picking an arm at random; However, it would make sense to have the probability 
-of picking an arm be proportional in some manner to the reward we have received from that arm this far.  This would ensure that the exploration we do 
-is less random and more sensible with regard to the arms' performance so far.  This type of proportional weighting is exactly what Boltzmann Exploration 
-uses.  Specifically, the probability of picking an arm is proportional to the average reward it has provided so far and these probabilities are 
-set according to the Boltzmann distribution.  Again, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
+While the $\epsilon$-greedy method explores by uniformly picking an arm at random, one instead might want the probability of an arm being chosen to be proportional to its observed reward. Intuitively, such an approach leverages a greater amount of information during the exploration phase.
+The Boltzmann Exploration algorithm randomly picks an arm according to a probability proportional to its average observed reward according to the Boltzmann distribution.  Specifically, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
 \begin{align*}
 p_i(t+1) = \frac{e^{\hat{\mu}_i(t)/\tau}}{\sum_{j=1}^{k} e^{\hat{\mu}_j(t)/\tau}} \, \, \textrm{for } i = 1, \ldots, k
 \end{align*}
 
-The value of $\tau$ (oftentimes called the ``temperature'' parameter) controls the randomness of the choices.  When $\tau \to 0$, the algorithm
-acts like pure greedy and continuously picks the arm with the highest observed empirical average.  When $\tau \to \infty$, the algorithm picks
-arms uniformly at random.
+The value of $\tau$ (often called the ``temperature'' parameter) controls the randomness of the choices.  When $\tau \to 0$, the algorithm always greedily chooses the arm with the highest observed empirical average while when $\tau \to \infty$, the algorithm picks
+arms uniformly at random. \cite{Kuleshov} notes that while a dynamic $\tau$ provides a polylogarthmic regret bound, running the algorithm with a static $\tau$ typically performs just as well.
 
 \subsection{Poker}
 The ``Price of Knowledge and Estimated Reward'' (Poker) strategy is a newer algorithm introduced in \cite{Mohri}.  Unlike the previous strategies,
 Poker is a pricing strategy that assigns prices to each arm and at each round picks the arm that has the highest price.  The price for each arm 
-takes into account two pieces of information: exploitation (the reward received from this arm so far) and exploration (the knowledge that could be gained
-from pulling this arm).  
+takes into account the sample mean and variance data as well as the time horizon of the algorithm
 
 Let $\mu^{*} = \max(\mu_1, \ldots, \mu_k)$ be the the highest mean.  Supposing $j_{0}$ is the index of the arm with the highest observed empirical mean, 
-let $\hat{\mu}^{*} = \mu_{j_{0}}$ be the actual mean of this arm.
-We know $\mu^{*} \ge \hat{\mu}^{*}$ and so $\mu^{*} - \hat{\mu}^{*}$ is the reward mean improvement.  We then denote 
+let $\hat{\mu}^{*} = \mu_{j_{0}}$ be the actual reward mean of this arm.
+We know $\mu^{*} \ge \hat{\mu}^{*}$ and so $\mu^{*} - \hat{\mu}^{*}$ is a non-negative quantity.  We then denote 
 $\delta_{\mu} = \mathbb{E}[\mu^{*} - \hat{\mu}^{*}]$ to be the expected reward improvement.
 
 At each round, the expected gain when pulling an arm $i$ is given by the expected reward improvement $\delta_{\mu}$ multiplied by the probability of an
-improvement $\Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}]$, where $\mu_i$ is the actual mean of the arm $i$.  If we let $H$ be the number of remaining rounds, 
-we can exploit this knowledge gain $H$ times and so the arm pricing formula is 
+improvement $\Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}]$, where $\mu_i$ is the reward actual mean of the arm $i$.  If we let $H$ be the number of remaining rounds, 
+we can exploit this knowledge gain $H$ times and price arm $i$ at
 $$
 p_i = \hat{\mu}_i + \Pr[\mu_i - \hat{\mu}^{*} \ge \delta_{\mu}] \delta_{\mu} H,
 $$
-where $\hat{\mu}_i$ (the empirical average) represents the exploitation price and the second term represents the exploration price of this specific arm $i$. 
+where $\hat{\mu}_i$ (the empirical average) represents the exploitation price and the second term represents the exploration price of arm $i$. 
 
 Let us now discuss the calculation of the second term.  Suppose $\hat{\mu}_{i_1} > \ldots > \hat{\mu}_{i_q}$ be the ordered observed means of arms.  
 We let $\delta_u = \left(\hat{\mu}_{i_1} - \hat{\mu}_{i_{\sqrt{q}}} \right)/\sqrt{q}$.  The authors chose $\sqrt{q}$ here because they observe that it works well
-in practice and because it provides some nice properties.
+in practice and minimizes variance and bias.
 
 Let $\mathcal{N}(x, \mu, \sigma) = \frac{1}{\sqrt{2 \pi \sigma}} \exp \left(\frac{(x - \mu)^2}{2 \sigma^2} \right)$ be the normal distribution.  
 Let $\hat{\mu}_i$ be the observed mean estimate, $\hat{\sigma}_i$ be the standard deviation estimate, and $n_i$ be the number of times the arm has been chosen, then
-we say
+we say (noting that the equality is exact if $\hat{\mu}_{i}$ is normally distributed)
 $$
 \Pr[\mu_i \ge \hat{\mu}^{*} + \delta_u] \approx \int_{\hat{\mu}^{*} + \delta_{\mu}}^{\infty} \mathcal{N}\left(x, \hat{\mu}_{i}, \frac{\hat{\sigma}_i}{\sqrt{n_i}} \right) dx.
 $$
 
 The pseudocode for the Poker algorithm is stated below.
 
+
 \begin{algorithm}[H]
+\scriptsize
   \caption{Poker Algorithm}
   $N \gets \emptyset$
   $\mu \gets \emptyset$ 
@@ -177,7 +174,8 @@ The pseudocode for the Poker algorithm is stated below.
   \end{algorithmic}
 \end{algorithm}
 
-\section{Algorithm}
+
+\section{New Algorithms}
 
 \subsection{Motivation}
 
@@ -185,7 +183,7 @@ The authors' proof that Poker is a zero regret strategy hinges upon considering 
 
 Recall Poker initializes itself by pulling two random arms twice. We present a simple bandit instance that will cause Poker to perform extremely poorly with a nontrivial probability.
 
-Define the distribution $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with normally-distributed mean rewards in $[0,1]$.We consider $(1-p)$ levers to be good (i.e. they all have mean rewards of 1) and the other $p$ levers to be bad. We consider the bad levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. Finally, we assume all levers have the same standard deviation $\gamma$. \\
+We define the bandit instance $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with mean rewards in $[0,1]$.We consider $(1-p)$ levers to be good (i.e. they all have mean rewards of 1) and the other $p$ levers to be bad. We consider the bad levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. Finally, we assume all levers provide normally-distributed payoffs with the same standard deviation $\gamma$. \\
 
 \noindent
 \textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$) each round is $O(p^{2})$. \\ 
