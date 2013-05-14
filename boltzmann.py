@@ -86,13 +86,5 @@ if __name__ == '__main__':
 	for list in dlist:
 		print list
 	
-	# Get means of each distribution
-	meanList = []
-	for (mu, sigma) in muSigmaList:
-		meanList.append(mu)
-		
-	# Print Distribution in sorted order
-	#eval.printMeans(meanList)
-	
 	choices = boltzmann(dlist, 0.5)
 	print choices

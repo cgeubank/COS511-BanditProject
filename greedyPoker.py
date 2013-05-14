@@ -148,14 +148,6 @@ if __name__ == '__main__':
 	dlist, muSigmaList = getDist(100, 1000)
 	for list in dlist:
 		print list
-	
-	# Get means of each distribution
-	#meanList = []
-	#for (mu, sigma) in muSigmaList:
-	#	meanList.append(mu)
-		
-	# Print Distribution in sorted order
-	#eval.printMeans(meanList)
-	
+
 	choices = greedyPoker(dlist, .5)
 	print choices

@@ -52,18 +52,18 @@ May 14, 2013           %%% FILL IN LECTURE DATE HERE
 \section{Introduction}
 
 We study the stochastic multi-armed bandit problem and present robust modifications to existing algorithms. In the bandit problem, a player is  
-faced with a row of slot machines (``arms'') and, during each round of the game, pulls a single arm.  When chosen by the player, an arm provides a random reward according to its machine-specific distribution. The player's goal is to maximize the sum of rewards received through a
+faced with a row of slot machines (``arms'') and during each round of the game pulls a single arm.  When chosen by the player, an arm provides a random reward according to its machine-specific distribution. The player's goal is to maximize the sum of rewards received through a
 sequence of selections.  
 
 An agent playing the bandit game is faced with the classic exploration-exploitation tradeoff.  On the one hand, the agent will want to 
-exploit the best arm he has found so far by repeatedly pulling it. On the other hand, he could explore other options,
+exploit the best arm he has found so far by repeatedly pulling it. On the other hand, he could explore other arms,
 which may or may not offer a higher reward.
 
-Although the original motivation for the problem, which continues relevant (e.g. \cite{Cassell}), was scheduling clinical trials, many 
+Although the original motivation for the problem, which continues to be relevant (e.g. \cite{Cassell}), was scheduling clinical trials, many 
 new applications have arisen.  One application is in ad placement, in which pulling an arm represents displaying an ad which, in turn,
 provides some financial reward.  In \cite{Chakrabarti}, the authors formulate a modified version
-of the problem, where arms have a lifetime after which they expire. This expiration helps to model ads, which often 
-have limited lifetimes due to their content and campaign budgets.  Another application is in Web document ranking, 
+of the problem where arms have a lifetime after which they expire. This expiration helps to model ads, which often 
+have limited lifetimes due to their content and campaign budgets.  Another application is in Web document ranking 
 in which, given a user's query, a site seeks to optimally rank and display relevant documents.
 In \cite{Radlinski}, the authors propose an online learning method using multi-armed bandit algorithms that produces rankings from usage data.   
 
@@ -71,7 +71,7 @@ In \cite{Radlinski}, the authors propose an online learning method using multi-a
 Formally, the multi-armed bandit problem consists of a set of $K$ probability distributions
 $(D_1, \ldots, D_k)$ with associated expected values $(\mu_1, \ldots, \mu_k)$.
 Initially, the distributions $D_i$ are unknown to the player.  At each round $t = 1,2,\ldots,T$, the player selects an arm with index $j(t)$
-and receives a reward $r(t) \sim D_{j(t)}$ and player's goal is to maximize his received reward summed over all rounds.  A bandit algorithm
+and receives a reward $r(t) \sim D_{j(t)}$. The player's goal is to maximize his received reward summed over all rounds.  A bandit algorithm
 specifies a strategy by which the player should choose an arm $j(t)$ in each round.
 
 According to \cite{Kuleshov}, the most popular performance measure for bandit algorithms is \emph{total expected regret}.  Assuming the 
@@ -79,14 +79,14 @@ total number of rounds is $T$, \emph{total expected regret} is defined as
 $$
 R_T = T\mu^{*} - \sum_{i=1}^{T} \mu_{j(t)},
 $$
-where $u^{*} = \max(\mu_1, \ldots, \mu_k)$ is the expected reward from the best arm. 
+where $\mu^{*} = \max(\mu_1, \ldots, \mu_k)$ is the expected reward from the best arm. 
 
 As background for our approach to the problem, we present three pre-existing bandit algorithms: $\epsilon$-greedy, Boltzmann exploration and Poker.
 For the next two subsections, let $p_i(t)$ be the probability of picking arm $i$ at time $t$.
 
 \subsection{$\epsilon$-greedy}
 
-The $\epsilon$-greedy algorithm is an extremely simple heuristic. \cite{Auer} refer to prior results guaranteeing at least a logarithmic level of regret and note that a greedy approach with a dynamic value of $\epsilon$ can provide a polylogarithmic guarantee.
+The $\epsilon$-greedy algorithm is an extremely simple heuristic. \cite{Auer} refer to prior results guaranteeing that bandit algorithms will provide at least a logarithmic level of regret and note that a greedy approach with a dynamic value of $\epsilon$ can provide a polylogarithmic guarantee.
 
 At each round $t = 1, \ldots, T$, the algorithm selects the arm with the highest observed empirical mean with probability $1 - \epsilon$ and
 selects a random arm with probability $\epsilon$.  More specifically, given empirical means $\hat{\mu}_1, \ldots, \hat{\mu}_k$,
@@ -185,12 +185,12 @@ The authors' proof that Poker is a zero regret strategy hinges upon considering 
 
 Recall Poker initializes itself by pulling two random arms twice. We present a simple bandit instance that will cause Poker to perform extremely poorly with a nontrivial probability.
 
-We define the bandit instance $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with mean rewards in $[0,1]$.We consider $(1-p)$ levers to be good (i.e. they all have mean rewards of 1) and the other $p$ levers to be bad. We consider the bad levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. Finally, we assume all levers provide normally-distributed payoffs with the same standard deviation $\gamma$. \\
+We define the bandit instance $\texttt{PATHOLOGICAL}(p)$ for $p \in [0,1]$ as a set of $K$ levers with mean rewards in $[0,1]$. We consider $(1-p)$ levers to be good (i.e. they all have mean rewards of 1) and the other $p$ levers to be bad. We consider the bad levers to have equally spaced rewards in the range $[0,\gamma]$ for some constant $\gamma$. Finally, we assume all levers provide normally-distributed payoffs with the same standard deviation $\sigma$. \\
 
 \noindent
 \textbf{Claim} For a finite $H$, as $\sigma \rightarrow 0$, the probability that Poker running on $\texttt{PATHOLOGICAL}(p)$ will lead to a choice of arms with nearly the maximum possible regret (i.e. at least $(1-\gamma)$) each round is $O(p^{2})$. \\ 
 
-Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct. If the two arms were the same, all $\hat{\mu}_{i} and \hat{\sigma}_{i}$ would be equal and the following argument would fail. Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will have calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
+Suppose that Poker initially chooses to pull two distinct bad arms. We require the two bad arms to be distinct. If the two arms were the same, all $\hat{\mu}_{i}$ and $\hat{\sigma}_{i}$ would be equal and the following argument would fail. Without loss of generality, let the indices of these arms be 1 and 2. By this point, the algorithm will have calculated $\hat{\mu}_{1}, \hat{\mu}_{2}, \hat{\sigma}_{1},\hat{\sigma}_{2}$ and, for all $i > 2$, will have set $\hat{\mu}_{i}= {\hat{\mu}_{1}+\hat{\mu}_{2}\over 2}$ and $\hat{\sigma}_{i} = {\hat{\sigma}_{1}+\hat{\sigma}_{2}\over 2}$
 
 In each turn, the algorithm sets $p_{i} = \hat{\mu}_{i} + \delta_{\mu}(T-t)\int_{\mu^{*}+\delta_{\mu}}^{\infty}\mathcal{N}(x,\hat{\mu}_{i}, \hat{\sigma}_{i})dx$
 
@@ -206,11 +206,11 @@ Finally, the probability that Poker initializes by choosing two distinct bad arm
 
 While the pathological distribution used in our worst-case analysis of Poker may be a somewhat artificial example, it demonstrates that in cases in which the arms' reward variances are small, the algorithm's final choices of arms could be highly dependent  on the initial choice of arms. An obvious solution to this problem is to simply initialize the algorithm with a greater number of random arms. However, we instead opted to merge the Poker algorithm with algorithms that incorporate a greater degree of randomness.
 
-A logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization round), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \texttt{greedyPoker} converges to standard Poker and as $\epsilon$ goes to 1, the algorithm converges to guessing.
+A logical extension to the Poker algorithm is \texttt{greedyPoker} in which, at each round (other than the initialization rounds), we pull a random lever with probability $\epsilon$. Otherwise, we pick the arm with the highest value of $p_{i}$. As $\epsilon \to 0$, \texttt{greedyPoker} converges to standard Poker and as $\epsilon \to 1$, the algorithm converges to guessing.
 
-Likewise, we consider merging Poker with the Boltzmann algorithm. During each round $\texttt{boltzPoker}$, the algorithm calculates the vector of $p_{i}$ values. Next, the algorithm maps this vector of values into probabilities vector in accordance to the Boltzmann distribution and a temperature parameter. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.} As the temperature parameter $\tau$ goes to 0, \texttt{boltzPoker} acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
+Likewise, we consider merging Poker with the Boltzmann algorithm. During each round $\texttt{boltzPoker}$, the algorithm calculates the vector of $p_{i}$ values. Next, the algorithm maps this vector of values into probabilities in accordance to the Boltzmann distribution and a temperature parameter. The algorithm then chooses the arm to pull based on this distribution.\footnote{In terms of implementation, we first normalize the vector of $p_{i}$ such that all the entries lie in $[0,1]$ so as to avoid numerical overflow during the calculations.} As the temperature parameter $\tau \to 0$, \texttt{boltzPoker} acts like the standard Poker algorithm while as $\tau \to \infty$, the algorithm converges to random guessing.
 
-In terms of design, we anticipated that the modified algorithms would be more robust in dealing with the initial conditions when compared to Poker due to incorporation of additional randomness. Likewise,  we also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms as compared to the sample means used in the basic Boltzmann and $\epsilon$-greedy algorithms.
+In terms of design, we anticipated that the modified algorithms would be more robust in dealing with the initial conditions when compared to Poker due to the incorporation of additional randomness. Likewise,  we also believed that $p_{i}$ values, which incorporate information regarding the standard deviations and time horizon, should be a superior proxy for the ``goodness" of arms as compared to the sample means used in the basic Boltzmann and $\epsilon$-greedy algorithms.
 
 In terms of theoretical performance, we can set the algorithms' parameters to be such that they will act as if they were simply the standard Poker algorithm. By manipulating the parameters, we can guarantee that the algorithms will perform at least as well as the standard Poker algorithm. However, finding these ideal parameters for every distribution (assuming they exist) is not necessarily a trivial task and requires extensive experimentation.
 
@@ -219,36 +219,35 @@ In terms of theoretical performance, we can set the algorithms' parameters to be
 We evaluate the strategies using four datasets: three generated artificially using the Normal, Inverse-Gaussian and Gumbel distributions, respectively,
 and one that is a real networking dataset that was also used for evaluation in \cite{Mohri}.  The networking dataset details the retrieval latency of more than $700$
 universities as sources for every $10$ min for about $10$ days ($\sim 1300$ rounds).  Each page is thus associated with an arm and each latency is associated to a negative reward.
-We implemented each of the algorithms mentioned above in Python\footnote{We have made all our code available at \texttt{https://github.com/cgeubank/COS511-BanditProject}}. 
+We implemented each of the algorithms mentioned above in Python.\footnote{We have made all our code available at \texttt{https://github.com/cgeubank/COS511-BanditProject}}
 
 For the algorithms that need parameters as inputs, we determined the value of these parameters by tuning them on a dataset generated by the Normal distribution, with $100$ arms,
-with $1000$ rounds, and averaged over multiple trials.  Please refer to Figure~\ref{fig:tuning} for more information about the specific parameters used.  We found that the choice of parameters
+with $1000$ rounds, and averaged over 25 trials/ distribution instances.  Please refer to Figure~\ref{fig:tuning} for more information about the specific parameters used.  We found that the choice of parameters
 were roughly equal when tuning them on the other artificial distributions.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{EpsilonTuning}
 \hfill
 \includegraphics[width=0.5\textwidth]{TempTuning}
-\caption{Tuning data used to find Epsilon and Temperate values for Epsilon-Greedy and Boltzmann algorithms, respectively.  The data for greedyPoker and boltzPoker followed
-the same trend.}
+\caption{Tuning data used to find $\epsilon$ and $\tau$ values for $\epsilon$-Greedy and Boltzmann algorithms, respectively.  The data for \texttt{greedyPoker} and \texttt{boltzPoker} followed the same trend and have thus been omitted for readability.}
 \label{fig:tuning}
 \end{figure}
 
 In the experiments, the \texttt{Random} strategy involves picking an arm uniformly at random in each round and is used to provide a baseline for the results.  Additionally,
-rather than measure the performance in terms of each strategy's expected regret, we normalize the expected regret as a percent of the max possible expected regret. 
+rather than measure the performance in terms of each strategy's expected regret, we normalize the expected regret as a percent of the maximum possible expected regret so as to get a value in $[0,1]$. 
 
 \subsection{Performance on Datasets}
 For each specific distribution, the data was generated by picking the mean and standard deviation (or in the case of Gumbel, $\beta$ value) uniformly at random from $[0,1]$.  The choice of what
 distributions to use was based on the fact that these distributions were also tested in \cite{Kuleshov}. 
 
-For the three randomized distributions, \texttt{$\epsilon$-greedy} performs surprising well, when compared to the \texttt{Boltzmann} and \texttt{boltzPoker} algorithms.  Especially after tuning, 
-\texttt{greedyPoker} performed the best on the three datasets, achieving nearly a third of the expected regret as \texttt{Poker}.  On the other hand, \texttt{Poker} performed second-best
-on Normal and Inverse-Gaussian distributions despite having no parameters to tune.
+For the three randomized distributions, $\epsilon$-greedy performs surprising well, when compared to the Boltzmann and \texttt{boltzPoker} algorithms.  Especially after tuning, 
+\texttt{greedyPoker} performed the best on the three datasets, achieving nearly a third of the expected regret as Poker on Gumbel.  On the other hand, Poker performed second-best
+on the Normal and Inverse-Gaussian distributions despite having no parameters to tune.
 
 Having tuned the algorithms, we expected that these optimal parameters would allow them to also perform favorably on the real-world network dataset. However, we found that
 the Poker algorithm significantly outperformed the other algorithms, including \texttt{boltzPoker} by greater than a factor of 5. Later, we were able to tune the parameters
 to get \texttt{greedyPoker} to perform marginally better than Poker on the dataset. However, this tuning required hundreds of trial runs while Poker achieved its performance
-without any kind of tuning. In real world situations, a user may not have access to the data sets or time to tune parameters before facing a bandit instance.
+without any kind of tuning.\footnote{More pessimistically, while we could lower $\epsilon$ to an arbitrarily small level, reducing $\tau$ to below 0.005 in \texttt{boltzPoker} led to the risk of numerical overflow in the $e^{\mu / \tau}$ terms.} In real world situations, a user may not have access to the data sets or time to tune parameters before facing a bandit instance.
 
 \begin{table}[htbp]
   \centering
@@ -270,7 +269,7 @@ without any kind of tuning. In real world situations, a user may not have access
 
 \section{Conclusion}
 
-We present two canonical algorithms for the multi-armed bandit problem as well as Poker, a newer algorithm that incorporates the time horizon of a particular bandit instances as well as the sample standard deviations. We identify a theoretical weakness in the initialization process of the Poker algorithm and merge Poker with the other two algorithms to create more robust versions of the algorithm.
+We present two canonical algorithms for the multi-armed bandit problem as well as Poker, a newer algorithm that incorporates the time horizons of particular bandit instances as well as the sample standard deviations into its analysis. We identify a theoretical weakness in the initialization process of the Poker algorithm and merge Poker with the other two algorithms to create more robust versions of the algorithm.
 
 After tuning the parameters for these algorithms, we find that \texttt{greedyPoker} in particular has a stronger performance than the Poker algorithm on random instances based on the Normal, Inverse Gaussian and Gumbel distribution. However, when using these algorithms on real data with the same tuned parameters, the standard Poker algorithm had a much better performance.
 

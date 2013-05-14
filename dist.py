@@ -174,7 +174,7 @@ def normalizeDist(dlist, meanList):
 	
 # Test main
 if __name__ == '__main__':
-	dlist, meanList = getDistFromFile() #getDist(5, 10)
+	dlist, meanList = getDist(5, 10)
 	for list in dlist:
 		print list
 		
